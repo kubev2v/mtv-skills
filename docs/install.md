@@ -88,27 +88,20 @@ done
 
 > **Tip:** Symlinks keep skills up to date — just `git pull` inside the cloned repo to get the latest changes.
 
-## MCP Server Prerequisites
+## CLI Plugin Prerequisites
 
-Several skills require MCP tools provided by kubectl plugins. Install them
-with the one-line installer (Linux / macOS):
+Several skills use `oc` plugins for querying metrics, managing migrations, and
+inspecting cluster resources. Install them with the one-line installer (Linux / macOS):
 
 ```bash
-# kubectl-mtv (MTV/Forklift migrations)
+# kubectl-mtv (https://github.com/yaacov/kubectl-mtv)
 curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/install.sh | bash
 
-# kubectl-metrics (Prometheus/Thanos metrics)
+# kubectl-metrics (https://github.com/yaacov/kubectl-metrics)
 curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
 
-# kubectl-debug-queries (Kubernetes resources, logs, events)
+# kubectl-debug-queries (https://github.com/yaacov/kubectl-debug-queries)
 curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
-```
-
-Or install with [krew](https://krew.sigs.k8s.io/):
-
-```bash
-kubectl krew install mtv
-kubectl krew install debug-queries
 ```
 
 All installers place binaries in `~/.local/bin` by default. If that directory
@@ -122,9 +115,16 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
 
-The **mcp-setup** skill can guide you through installation and MCP server
-configuration interactively. Just ask your agent: *"Set up the MCP servers
-so I can use these tools."*
+Verify the installation:
+
+```bash
+oc mtv --help
+oc metrics --help
+oc debug-queries --help
+```
+
+The **mcp-setup** skill can guide you through installation interactively. Just ask
+your agent: *"Install the CLI plugins so I can use these tools."*
 
 ## Removal
 

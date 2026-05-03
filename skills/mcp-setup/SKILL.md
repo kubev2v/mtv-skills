@@ -1,73 +1,56 @@
 ---
 name: mcp-setup
-description: Install and configure the MCP servers for Forklift/MTV, Prometheus metrics, and Kubernetes debug queries. Use when MCP tools (metrics_read, mtv_read, debug_read) are not available, or when the user wants to set up AI agent integration.
+description: Install and configure the CLI plugins for Forklift/MTV, Prometheus metrics, and Kubernetes debug queries. Use when CLI tools (oc mtv, oc metrics, oc debug-queries) are not available, or when the user wants to set up the tools.
 ---
 
-# MCP Server Setup
+# CLI Plugin Setup
 
-This plugin provides skills only — MCP servers are **not** bundled and must be
-installed and configured separately. This skill walks the user through both steps.
+This skill helps you install the `oc` plugins required by the other skills in this collection.
 
 ## What to Check
 
-First, check if the kubectl plugins are already installed:
+First, check if the plugins are already installed:
 
 ```bash
-kubectl metrics --help 2>/dev/null && echo "METRICS_OK" || echo "METRICS_MISSING"
-kubectl mtv --help 2>/dev/null && echo "MTV_OK" || echo "MTV_MISSING"
-kubectl debug-queries --help 2>/dev/null && echo "DEBUG_OK" || echo "DEBUG_MISSING"
+oc mtv --help 2>/dev/null && echo "MTV_OK" || echo "MTV_MISSING"
+oc metrics --help 2>/dev/null && echo "METRICS_OK" || echo "METRICS_MISSING"
+oc debug-queries --help 2>/dev/null && echo "DEBUG_OK" || echo "DEBUG_MISSING"
 ```
-
-Then check if MCP servers are already configured by trying a simple call to
-each MCP tool. If the tools respond, skip to "Tool Summary."
 
 ## How to Respond
 
 Based on the results above, tell the user **only** what is missing and provide
-the relevant install and configuration instructions. If everything is already
-installed and configured, confirm it and move on.
+the relevant install instructions. If everything is already installed, confirm it and move on.
 
 ### Install kubectl-mtv (MTV/Forklift migrations)
 
-Quick install (Linux / macOS):
+GitHub: [yaacov/kubectl-mtv](https://github.com/yaacov/kubectl-mtv)
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/install.sh | bash
 ```
 
-Or with [krew](https://krew.sigs.k8s.io/):
-
-```bash
-kubectl krew install mtv
-```
-
-Verify: `kubectl mtv --help`
+Verify: `oc mtv --help`
 
 ### Install kubectl-metrics (Prometheus/Thanos metrics)
 
-Quick install (Linux / macOS):
+GitHub: [yaacov/kubectl-metrics](https://github.com/yaacov/kubectl-metrics)
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
 ```
 
-Verify: `kubectl metrics --help`
+Verify: `oc metrics --help`
 
 ### Install kubectl-debug-queries (Kubernetes resources, logs, events)
 
-Quick install (Linux / macOS):
+GitHub: [yaacov/kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries)
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
 ```
 
-Or with [krew](https://krew.sigs.k8s.io/):
-
-```bash
-kubectl krew install debug-queries
-```
-
-Verify: `kubectl debug-queries --help`
+Verify: `oc debug-queries --help`
 
 ### PATH setup
 
@@ -81,23 +64,28 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
 
-## MCP Server Configuration
+## Tool Summary
 
-After installing the binaries, configure each as an MCP server. The plugin
-does not include MCP server configs, so this step is required for the skills
-that use MCP tools (`mtv_read`, `debug_read`, `metrics_read`).
+| CLI Plugin | Commands | What It Does |
+|------------|----------|--------------|
+| [kubectl-mtv](https://github.com/yaacov/kubectl-mtv) | `oc mtv` | Manage MTV/Forklift migrations: providers, plans, inventory, health |
+| [kubectl-metrics](https://github.com/yaacov/kubectl-metrics) | `oc metrics` | Query Prometheus/Thanos metrics, discover metrics, instant and range queries |
+| [kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries) | `oc debug-queries` | List/get Kubernetes resources, pod logs, events with TSL filtering |
+
+Note: `kubectl mtv`, `kubectl metrics`, and `kubectl debug-queries` also work as aliases.
+
+## Optional: MCP Server Configuration
+
+If you are using an AI agent that supports MCP (Model Context Protocol), these plugins
+can also run as MCP servers. This is optional — the skills work with the CLI directly.
 
 ### Claude Code (CLI)
 
-If the user installed this plugin via Claude Code, run:
-
 ```bash
-claude mcp add kubectl-metrics -- kubectl metrics mcp-server
-claude mcp add kubectl-mtv -- kubectl mtv mcp-server
-claude mcp add kubectl-debug-queries -- kubectl debug-queries mcp-server
+claude mcp add kubectl-metrics -- oc metrics mcp-server
+claude mcp add kubectl-mtv -- oc mtv mcp-server
+claude mcp add kubectl-debug-queries -- oc debug-queries mcp-server
 ```
-
-After adding, restart the session or run `/mcp` to verify the servers appear.
 
 ### Cursor IDE
 
@@ -105,9 +93,9 @@ Settings -> MCP -> Add Server for each:
 
 | Name | Command | Args |
 |------|---------|------|
-| kubectl-metrics | `kubectl` | `metrics mcp-server` |
-| kubectl-mtv | `kubectl` | `mtv mcp-server` |
-| kubectl-debug-queries | `kubectl` | `debug-queries mcp-server` |
+| kubectl-metrics | `oc` | `metrics mcp-server` |
+| kubectl-mtv | `oc` | `mtv mcp-server` |
+| kubectl-debug-queries | `oc` | `debug-queries mcp-server` |
 
 ### Claude Desktop
 
@@ -117,15 +105,15 @@ Edit `claude_desktop_config.json` and add to the `mcpServers` section:
 {
   "mcpServers": {
     "kubectl-metrics": {
-      "command": "kubectl",
+      "command": "oc",
       "args": ["metrics", "mcp-server"]
     },
     "kubectl-mtv": {
-      "command": "kubectl",
+      "command": "oc",
       "args": ["mtv", "mcp-server"]
     },
     "kubectl-debug-queries": {
-      "command": "kubectl",
+      "command": "oc",
       "args": ["debug-queries", "mcp-server"]
     }
   }
@@ -137,14 +125,14 @@ Edit `claude_desktop_config.json` and add to the `mcpServers` section:
 For remote or server-based agents, run each MCP server in SSE mode:
 
 ```bash
-kubectl metrics mcp-server --sse --port 8080
-kubectl mtv mcp-server --sse --port 8081
-kubectl debug-queries mcp-server --sse --port 8082
+oc metrics mcp-server --sse --port 8080
+oc mtv mcp-server --sse --port 8081
+oc debug-queries mcp-server --sse --port 8082
 ```
 
 ### Container Images (no local binary needed)
 
-Run MCP servers as containers instead of installing kubectl plugins locally.
+Run MCP servers as containers instead of installing the plugins locally.
 Requires Docker or Podman and a valid cluster token:
 
 ```bash
@@ -181,13 +169,3 @@ oc apply -f https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/deploy/mcp
 # kubectl-debug-queries
 oc apply -f https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/deploy/mcp-server.yaml
 ```
-
-## Tool Summary
-
-| MCP Server | MCP Tools | What It Does |
-|------------|-----------|--------------|
-| kubectl-metrics | `metrics_read`, `metrics_help` | Query Prometheus/Thanos metrics, discover metrics, instant and range queries |
-| kubectl-mtv | `mtv_read`, `mtv_write`, `mtv_help` | Manage MTV/Forklift migrations: providers, plans, inventory, health |
-| kubectl-debug-queries | `debug_read`, `debug_help` | List/get Kubernetes resources, pod logs, events with TSL filtering |
-
-Note: `oc metrics`, `oc mtv`, and `oc debug-queries` are aliases for the kubectl versions on OpenShift clusters.

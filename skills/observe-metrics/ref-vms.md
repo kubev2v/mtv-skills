@@ -6,50 +6,42 @@ Queries, labels, and metrics for KubeVirt virtual machines. Use `name` and `name
 
 ### CPU + memory trend (combined in one call)
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_cpu_usage_seconds_total[5m]))))",
-          "topk(10, sort_desc(sum by (name,namespace)(kubevirt_vmi_memory_resident_bytes)))"],
-  name: ["cpu_cores", "mem_bytes"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_cpu_usage_seconds_total[5m]))))" \
+  --query "topk(10, sort_desc(sum by (name,namespace)(kubevirt_vmi_memory_resident_bytes)))" \
+  --name cpu_cores --name mem_bytes \
+  --start "-1h" --step 60s
 ```
 
 ### Network RX + TX trend (combined in one call)
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_network_receive_bytes_total[5m]))))",
-          "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_network_transmit_bytes_total[5m]))))"],
-  name: ["rx_bytes_per_sec", "tx_bytes_per_sec"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_network_receive_bytes_total[5m]))))" \
+  --query "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_network_transmit_bytes_total[5m]))))" \
+  --name rx_bytes_per_sec --name tx_bytes_per_sec \
+  --start "-1h" --step 60s
 ```
 
 ### Storage read + write trend (combined in one call)
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_storage_read_traffic_bytes_total[5m]))))",
-          "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_storage_write_traffic_bytes_total[5m]))))"],
-  name: ["read_bytes_per_sec", "write_bytes_per_sec"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_storage_read_traffic_bytes_total[5m]))))" \
+  --query "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_storage_write_traffic_bytes_total[5m]))))" \
+  --name read_bytes_per_sec --name write_bytes_per_sec \
+  --start "-1h" --step 60s
 ```
 
 ### Storage IOPS trend (combined in one call)
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_storage_iops_read_total[5m]))))",
-          "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_storage_iops_write_total[5m]))))"],
-  name: ["read_iops", "write_iops"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_storage_iops_read_total[5m]))))" \
+  --query "topk(10, sort_desc(sum by (name,namespace)(rate(kubevirt_vmi_storage_iops_write_total[5m]))))" \
+  --name read_iops --name write_iops \
+  --start "-1h" --step 60s
 ```
 
 ## Per-VM queries
@@ -58,50 +50,42 @@ Replace `VM_NAME` and `VM_NS` with actual values:
 
 ### CPU + memory trend for a specific VM
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["rate(kubevirt_vmi_cpu_usage_seconds_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])",
-          "kubevirt_vmi_memory_resident_bytes{name=\"VM_NAME\",namespace=\"VM_NS\"}"],
-  name: ["cpu_cores", "mem_bytes"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "rate(kubevirt_vmi_cpu_usage_seconds_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])" \
+  --query "kubevirt_vmi_memory_resident_bytes{name=\"VM_NAME\",namespace=\"VM_NS\"}" \
+  --name cpu_cores --name mem_bytes \
+  --start "-1h" --step 60s
 ```
 
 ### Network RX + TX trend for a specific VM
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["rate(kubevirt_vmi_network_receive_bytes_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])",
-          "rate(kubevirt_vmi_network_transmit_bytes_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])"],
-  name: ["rx_bytes_per_sec", "tx_bytes_per_sec"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "rate(kubevirt_vmi_network_receive_bytes_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])" \
+  --query "rate(kubevirt_vmi_network_transmit_bytes_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])" \
+  --name rx_bytes_per_sec --name tx_bytes_per_sec \
+  --start "-1h" --step 60s
 ```
 
 ### Storage read + write trend for a specific VM
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["rate(kubevirt_vmi_storage_read_traffic_bytes_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])",
-          "rate(kubevirt_vmi_storage_write_traffic_bytes_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])"],
-  name: ["read_bytes_per_sec", "write_bytes_per_sec"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "rate(kubevirt_vmi_storage_read_traffic_bytes_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])" \
+  --query "rate(kubevirt_vmi_storage_write_traffic_bytes_total{name=\"VM_NAME\",namespace=\"VM_NS\"}[5m])" \
+  --name read_bytes_per_sec --name write_bytes_per_sec \
+  --start "-1h" --step 60s
 ```
 
 ## VM disk IOPS and latency
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["rate(kubevirt_vmi_storage_iops_read_total{name=\"VM_NAME\"}[5m])",
-          "rate(kubevirt_vmi_storage_read_times_seconds_total{name=\"VM_NAME\"}[5m]) / rate(kubevirt_vmi_storage_iops_read_total{name=\"VM_NAME\"}[5m])"],
-  name: ["read_iops", "read_latency_sec"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "rate(kubevirt_vmi_storage_iops_read_total{name=\"VM_NAME\"}[5m])" \
+  --query "rate(kubevirt_vmi_storage_read_times_seconds_total{name=\"VM_NAME\"}[5m]) / rate(kubevirt_vmi_storage_iops_read_total{name=\"VM_NAME\"}[5m])" \
+  --name read_iops --name read_latency_sec \
+  --start "-1h" --step 60s
 ```
 
 ## Available labels on kubevirt_vmi_* metrics

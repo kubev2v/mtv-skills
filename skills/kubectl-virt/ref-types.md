@@ -1,4 +1,4 @@
-# kubectl virt Reference - Instance Types, Disk Sources, SSH Methods
+# oc virt Reference - Instance Types, Disk Sources, SSH Methods
 
 Instance type tables, VM disk source types, containerdisk images, cluster DataSources, and additional SSH access methods.
 
@@ -49,7 +49,7 @@ Preferences configure OS-specific settings (boot order, device models, firmware)
 
 ## VM Disk Sources
 
-The `--volume-import` flag on `kubectl virt create vm` supports these source types:
+The `--volume-import` flag on `oc virt create vm` supports these source types:
 
 | Type | Description | Example |
 |------|-------------|---------|
@@ -82,7 +82,7 @@ via DataImportCron jobs. These live in the `openshift-virtualization-os-images`
 namespace and can be used directly as boot sources without downloading anything.
 
 ```bash
-kubectl get datasource -n openshift-virtualization-os-images
+oc get datasource -n openshift-virtualization-os-images
 ```
 
 ---
@@ -97,7 +97,7 @@ Forwards a local port through the API server. Useful for integrating with your
 `~/.ssh/config`. Same API server caveat as Method 1.
 
 ```bash
-kubectl virt port-forward vm/my-vm 2222:22
+oc virt port-forward vm/my-vm 2222:22
 
 # Then in another terminal
 ssh -p 2222 fedora@127.0.0.1
@@ -110,9 +110,9 @@ on every cluster node. You can then SSH from outside the cluster using any node'
 and the assigned port. Works on any cluster (bare metal, cloud, etc.).
 
 ```bash
-kubectl virt expose vm my-vm --name=my-vm-ssh --port=22 --type=NodePort
+oc virt expose vm my-vm --name=my-vm-ssh --port=22 --type=NodePort
 
-kubectl get svc my-vm-ssh
+oc get svc my-vm-ssh
 # Example output:
 #   NAME        TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
 #   my-vm-ssh   NodePort   10.96.0.123   <none>        22:31245/TCP   5s
@@ -121,7 +121,7 @@ kubectl get svc my-vm-ssh
 ssh -p 31245 fedora@<any-node-ip>
 
 # To find node IPs:
-kubectl get nodes -o wide
+oc get nodes -o wide
 ```
 
 ### Method 4: ClusterIP Service (access from within the cluster)
@@ -129,7 +129,7 @@ kubectl get nodes -o wide
 For access from other pods/VMs inside the same cluster only. Not reachable from outside.
 
 ```bash
-kubectl virt expose vm my-vm --name=my-vm-ssh --port=22 --type=ClusterIP
+oc virt expose vm my-vm --name=my-vm-ssh --port=22 --type=ClusterIP
 # Connect from another pod in the cluster:
 ssh fedora@my-vm-ssh.<namespace>.svc.cluster.local
 ```

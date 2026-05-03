@@ -114,7 +114,7 @@ The plan must include:
 <What this test verifies, in one paragraph>
 
 ## Prerequisites
-- oc / kubectl with mtv plugin installed
+- oc with mtv plugin installed (kubectl also works)
 - MTV installed on the cluster
 - Environment variables set: <list>
 - <Any other prereqs: VM name, VDDK image, custom controller image, etc.>

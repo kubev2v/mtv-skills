@@ -4,44 +4,44 @@ Queries, labels, and metrics for Ceph/ODF storage on OpenShift. See [SKILL.md](S
 
 ## Cluster-wide storage health
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_health_status"}
+```bash
+oc metrics query --query "ceph_health_status"
 ```
 
 Health values: 0=OK, 1=WARN, 2=ERR.
 
 ## Storage capacity
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_cluster_total_bytes"}
-metrics_read  command: "query"  flags: {query: "ceph_cluster_total_used_bytes"}
-metrics_read  command: "query"  flags: {query: "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes * 100"}
+```bash
+oc metrics query --query "ceph_cluster_total_bytes"
+oc metrics query --query "ceph_cluster_total_used_bytes"
+oc metrics query --query "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes * 100"
 ```
 
 ## Pool-level statistics
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_pool_percent_used * 100"}
+```bash
+oc metrics query --query "ceph_pool_percent_used * 100"
 ```
 
 ## Pool I/O rates
 
-```
-metrics_read  command: "query"  flags: {query: "rate(ceph_pool_rd[5m])"}
-metrics_read  command: "query"  flags: {query: "rate(ceph_pool_wr[5m])"}
+```bash
+oc metrics query --query "rate(ceph_pool_rd[5m])"
+oc metrics query --query "rate(ceph_pool_wr[5m])"
 ```
 
 ## OSD operation latency
 
-```
-metrics_read  command: "query"  flags: {query: "rate(ceph_osd_op_latency_sum[5m]) / rate(ceph_osd_op_latency_count[5m])"}
+```bash
+oc metrics query --query "rate(ceph_osd_op_latency_sum[5m]) / rate(ceph_osd_op_latency_count[5m])"
 ```
 
 ## Placement group health
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_pg_total"}
-metrics_read  command: "query"  flags: {query: "ceph_pg_degraded"}
+```bash
+oc metrics query --query "ceph_pg_total"
+oc metrics query --query "ceph_pg_degraded"
 ```
 
 ## Available labels on ceph_* metrics
