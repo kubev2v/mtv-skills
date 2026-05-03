@@ -15,7 +15,7 @@ Just open a chat and ask. Here's one high-impact example per skill:
 | *"Plot the forklift namespace RX/TX for the last 24h in a chart"* | **observe-metrics** |
 | *"Create a Fedora VM with 4 GiB RAM and start it"* | **kubectl-virt** |
 | *"Is Ceph healthy? Any OSDs near full?"* | **check-ceph-health** |
-| *"Set up the MCP servers so I can use these tools"* | **mcp-setup** |
+| *"Install the CLI plugins so I can use these tools"* | **mcp-setup** |
 | *"Write a verification script for MTV-4911"* | **mtv-verify-script** |
 
 ## Quick Start
@@ -50,17 +50,27 @@ For Claude Code per-project installs, Cursor per-project installs, and removal s
 
 ## Prerequisites
 
-Several skills use MCP tools (`mtv_read`, `debug_read`, `metrics_read`) that require
-kubectl plugins installed on your machine. The **mcp-setup** skill can guide you through
-installation, or see [docs/install.md](docs/install.md) for manual steps.
+Several skills use CLI plugins that must be installed on your machine. The **mcp-setup** skill
+can guide you through installation, or install manually:
 
-| kubectl plugin | MCP tools provided |
+```bash
+# kubectl-mtv (https://github.com/yaacov/kubectl-mtv)
+curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/install.sh | bash
+
+# kubectl-metrics (https://github.com/yaacov/kubectl-metrics)
+curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
+
+# kubectl-debug-queries (https://github.com/yaacov/kubectl-debug-queries)
+curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
+```
+
+| Plugin | CLI command |
 |---|---|
-| [kubectl-mtv](https://github.com/yaacov/kubectl-mtv) | `mtv_read`, `mtv_write`, `mtv_help` |
-| [kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries) | `debug_read`, `debug_help` |
-| [kubectl-metrics](https://github.com/yaacov/kubectl-metrics) | `metrics_read`, `metrics_help` |
+| [kubectl-mtv](https://github.com/yaacov/kubectl-mtv) | `oc mtv` |
+| [kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries) | `oc debug-queries` |
+| [kubectl-metrics](https://github.com/yaacov/kubectl-metrics) | `oc metrics` |
 
-Skills that do not require MCP tools (**govc-vsphere**, **kubectl-virt**) work without any prerequisites.
+Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) work without any prerequisites.
 
 ## Included Skills
 
@@ -71,7 +81,7 @@ Skills that do not require MCP tools (**govc-vsphere**, **kubectl-virt**) work w
 | **govc-vsphere** | Manage VMware vSphere VMs using the govc CLI |
 | **kubectl-mtv** | Manage MTV/Forklift VM migrations from vSphere, oVirt, OpenStack, OVA, EC2, or HyperV |
 | **kubectl-virt** | Create, start, stop, and manage KubeVirt virtual machines |
-| **mcp-setup** | Install and configure MCP servers (kubectl-mtv, kubectl-metrics, kubectl-debug-queries) |
+| **mcp-setup** | Install and configure CLI plugins (kubectl-mtv, kubectl-metrics, kubectl-debug-queries) |
 | **mtv-verify-script** | Generate and run a self-contained bash e2e verification script for an MTV/Forklift Jira ticket |
 | **observe-metrics** | Observe cluster metrics via Prometheus/Thanos (discovery, instant and range queries, PromQL) |
 | **troubleshoot-virt** | Troubleshoot stuck VMs, DataVolumes, and migrations |

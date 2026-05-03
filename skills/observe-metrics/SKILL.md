@@ -5,12 +5,12 @@ description: Observe cluster metrics via Prometheus/Thanos. Use when the user wa
 
 # Observe Cluster Metrics
 
-Use this guide to discover and query Prometheus/Thanos metrics on an OpenShift cluster using the `metrics_read` MCP tool. The MCP server handles authentication and routing automatically.
+Use this guide to discover and query Prometheus/Thanos metrics on an OpenShift cluster using the `oc metrics` CLI.
 
 **Important — combine related metrics:** When the user asks about related metrics
 (e.g. network RX and TX, CPU and memory, storage read and write), always use a single
-`query_range` call with arrays in the `query` and `name` flags. This produces aligned
-timestamps, a single multi-column result, and requires only one MCP call.
+`query-range` call with repeated `--query` and `--name` flags. This produces aligned
+timestamps, a single multi-column result, and requires only one CLI call.
 
 For detailed per-domain queries, labels, and metrics tables:
 - Storage (Ceph/ODF): [ref-storage.md](ref-storage.md)
@@ -19,104 +19,100 @@ For detailed per-domain queries, labels, and metrics tables:
 - KubeVirt VMs: [ref-vms.md](ref-vms.md)
 - Forklift/MTV migrations: [ref-mtv.md](ref-mtv.md)
 
-## Required MCP Servers
+## Required CLI Tools
 
-This skill requires: `metrics_read` (from the kubectl-metrics MCP server).
+This skill requires:
+- `oc metrics` ([kubectl-metrics](https://github.com/yaacov/kubectl-metrics)) -- for Prometheus queries
 
-If `metrics_read` is not available in your environment, inform the user and refer them to the `mcp-setup` skill for installation instructions. Do not attempt bash fallback.
+If missing, install with:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
+```
 
 ## Getting Help
 
-Before querying, call `metrics_help` to learn available subcommands and flags:
+Before querying, call `--help` to learn available subcommands and flags:
 
-```
-metrics_help                                -- overview of all subcommands
-metrics_help  command: "query"              -- flags for instant queries
-metrics_help  command: "query_range"        -- flags for range queries
-metrics_help  command: "discover"           -- flags for metric discovery
-metrics_help  command: "promql"             -- PromQL syntax reference
+```bash
+oc metrics --help
+oc metrics query --help
+oc metrics query-range --help
+oc metrics discover --help
 ```
 
 ## Step 1: Discover Available Metrics
 
 ### List all metric names (or search by keyword)
 
-```
-metrics_read  command: "discover"
-metrics_read  command: "discover"  flags: {keyword: "ceph"}
-metrics_read  command: "discover"  flags: {keyword: "kubevirt"}
-metrics_read  command: "discover"  flags: {keyword: "mtv"}
+```bash
+oc metrics discover
+oc metrics discover --keyword ceph
+oc metrics discover --keyword kubevirt
+oc metrics discover --keyword mtv
 ```
 
 ### Group metric names by prefix
 
-```
-metrics_read  command: "discover"  flags: {keyword: "mtv", group_by_prefix: true}
+```bash
+oc metrics discover --keyword mtv --group-by-prefix
 ```
 
 ### List labels for a specific metric
 
-```
-metrics_read  command: "labels"  flags: {metric: "container_network_receive_bytes_total"}
+```bash
+oc metrics labels --metric container_network_receive_bytes_total
 ```
 
 ## Step 2: Instant Queries
 
 Use instant queries for point-in-time health checks:
 
-```
-metrics_read  command: "query"  flags: {query: "up"}
-metrics_read  command: "query"  flags: {query: "ceph_health_status"}
-metrics_read  command: "query"  flags: {query: "count by (phase)(kube_pod_status_phase == 1)"}
+```bash
+oc metrics query --query "up"
+oc metrics query --query "ceph_health_status"
+oc metrics query --query "count by (phase)(kube_pod_status_phase == 1)"
 ```
 
 ## Step 3: Range Queries (Time-Series Trends)
 
-Use `query_range` for time-series data. Pass `query` and `name` as arrays to fetch
+Use `query-range` for time-series data. Repeat `--query` and `--name` flags to fetch
 multiple related metrics in a single call.
 
 ### Single metric trend
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: "rate(http_requests_total[5m])",
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range --query "rate(http_requests_total[5m])" --start "-1h" --step 60s
 ```
 
 ### Multi-metric trend (preferred for related metrics)
 
 Combine related metrics in one call — each query gets its own named column:
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["sum(rate(container_network_receive_bytes_total{namespace=\"TARGET_NS\"}[5m]))",
-          "sum(rate(container_network_transmit_bytes_total{namespace=\"TARGET_NS\"}[5m]))"],
-  name: ["rx_bytes_per_sec", "tx_bytes_per_sec"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "sum(rate(container_network_receive_bytes_total{namespace=\"TARGET_NS\"}[5m]))" \
+  --query "sum(rate(container_network_transmit_bytes_total{namespace=\"TARGET_NS\"}[5m]))" \
+  --name rx_bytes_per_sec --name tx_bytes_per_sec \
+  --start "-1h" --step 60s
 ```
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["sum(rate(container_cpu_usage_seconds_total[5m])) by (namespace)",
-          "sum(container_memory_working_set_bytes) by (namespace)"],
-  name: ["cpu", "mem"],
-  start: "-1h"
-}
+```bash
+oc metrics query-range \
+  --query "sum(rate(container_cpu_usage_seconds_total[5m])) by (namespace)" \
+  --query "sum(container_memory_working_set_bytes) by (namespace)" \
+  --name cpu --name mem \
+  --start "-1h"
 ```
 
 ### Filtering results
 
 Use PromQL label selectors directly in the query to narrow results:
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: "rate(container_network_receive_bytes_total{namespace=\"konveyor-forklift\"}[5m])",
-  start: "-1h"
-}
+```bash
+oc metrics query-range \
+  --query "rate(container_network_receive_bytes_total{namespace=\"konveyor-forklift\"}[5m])" \
+  --start "-1h"
 ```
 
 Selector operators: `=` (equal), `!=` (not equal), `=~` (regex), `!~` (negative regex). Combine with commas: `namespace="prod",pod=~"nginx.*"`.
@@ -125,45 +121,42 @@ Selector operators: `=` (equal), `!=` (not equal), `=~` (regex), `!~` (negative 
 
 Run these queries for a cluster overview:
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["avg(instance:node_cpu:ratio) * 100",
-          "(1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)) * 100"],
-  name: ["cpu_pct", "mem_pct"],
-  start: "-1h"
-}
-metrics_read  command: "query"  flags: {query: "sum(kube_node_status_condition{condition='Ready',status='true'})"}
-metrics_read  command: "query"  flags: {query: "count by (phase)(kube_pod_status_phase == 1)"}
-metrics_read  command: "query"  flags: {query: "topk(10, sort_desc(kube_pod_container_status_restarts_total))"}
-metrics_read  command: "query"  flags: {query: "ceph_health_status"}
+```bash
+oc metrics query-range \
+  --query "avg(instance:node_cpu:ratio) * 100" \
+  --query "(1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)) * 100" \
+  --name cpu_pct --name mem_pct \
+  --start "-1h"
+
+oc metrics query --query "sum(kube_node_status_condition{condition='Ready',status='true'})"
+oc metrics query --query "count by (phase)(kube_pod_status_phase == 1)"
+oc metrics query --query "topk(10, sort_desc(kube_pod_container_status_restarts_total))"
+oc metrics query --query "ceph_health_status"
 ```
 
 ## Visualizing Range Queries with gnuplot
 
 When the user asks for a chart, graph, or visualization of metrics, use `gnuplot` to
-open an interactive window. Use the `filename` flag so the MCP server writes TSV directly
+open an interactive window. Use the `--filename` flag so the CLI writes TSV directly
 to a temp file — the LLM never needs to see or copy the raw data.
 
 ### Steps
 
-1. Run the range query with `output: "tsv"` and `filename: "metrics.tsv"`.
-   The MCP server writes the data to a temp file and returns a short summary
+1. Run the range query with `--output tsv` and `--filename metrics.tsv`.
+   The CLI writes the data to a temp file and returns a short summary
    with the full file path, row count, and column names.
 2. Extract the full file path from the summary and build a gnuplot script that
    reads from it. Run `gnuplot -p`.
 
 ### Example metrics call
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["sum(rate(container_network_receive_bytes_total{namespace=\"konveyor-forklift\"}[5m]))",
-          "sum(rate(container_network_transmit_bytes_total{namespace=\"konveyor-forklift\"}[5m]))"],
-  name: ["rx_bytes_per_sec", "tx_bytes_per_sec"],
-  start: "-24h",
-  step: "5m",
-  output: "tsv",
-  filename: "metrics.tsv"
-}
+```bash
+oc metrics query-range \
+  --query "sum(rate(container_network_receive_bytes_total{namespace=\"konveyor-forklift\"}[5m]))" \
+  --query "sum(rate(container_network_transmit_bytes_total{namespace=\"konveyor-forklift\"}[5m]))" \
+  --name rx_bytes_per_sec --name tx_bytes_per_sec \
+  --start "-24h" --step 5m \
+  --output tsv --filename metrics.tsv
 ```
 
 The response will be short, e.g.: `Wrote 288 rows to /var/folders/.../T/metrics.tsv\nColumns: timestamp  rx_bytes_per_sec  tx_bytes_per_sec`
@@ -172,7 +165,7 @@ Use the full path from the response in the gnuplot script.
 
 ### gnuplot template
 
-Replace `FILE_PATH` with the full path from the metrics_read response:
+Replace `FILE_PATH` with the full path from the CLI response:
 
 ```bash
 gnuplot -p <<'GP'
@@ -193,9 +186,9 @@ GP
 
 ### Adapting the template
 
-- Replace `FILE_PATH` with the full path returned by `metrics_read` in its summary.
+- Replace `FILE_PATH` with the full path returned by `oc metrics` in its summary.
 - Replace `TITLE`, `UNIT`, and column titles with descriptive values from the query.
-- Use the column names from the summary returned by `metrics_read` for the plot titles.
+- Use the column names from the summary returned by `oc metrics` for the plot titles.
 - Add one `using 1:N` clause per data column (skip the header row automatically).
 - For a single data column, drop the `\` continuation and use only one `plot` entry.
 - Use `set format x "%m/%d %H:%M"` when the range spans multiple days.
@@ -203,8 +196,8 @@ GP
   execution (e.g., `required_permissions: ["all"]`), otherwise the window will fail silently.
 - If `gnuplot` or the `qt` terminal is not available, fall back to `set terminal dumb size 120 30` for ASCII output in the shell.
 - Multi-query range results produce multi-column TSV — one column per named query.
-- **Always pass the `filename` flag** for range queries intended for gnuplot. This keeps
-  the MCP response small and avoids slow token generation.
+- **Always pass the `--filename` flag** for range queries intended for gnuplot. This keeps
+  the response small and avoids slow token generation.
 
 ## PromQL Quick Reference
 
@@ -256,11 +249,10 @@ rate(ceph_osd_op_latency_sum[5m]) / rate(ceph_osd_op_latency_count[5m])
 
 ## Self-Learning Rule
 
-When you need to discover available flags, build custom queries, or verify syntax:
+When you need to discover available flags or verify syntax:
 
-```
-metrics_help  command: "query"
-metrics_help  command: "query_range"
-metrics_help  command: "discover"
-metrics_help  command: "promql"
+```bash
+oc metrics query --help
+oc metrics query-range --help
+oc metrics discover --help
 ```

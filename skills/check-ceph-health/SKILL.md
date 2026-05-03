@@ -7,36 +7,41 @@ description: Check Ceph storage health on OpenShift OCS/ODF clusters. Use when P
 
 Use this guide to diagnose and remediate Ceph storage issues on OpenShift clusters running OCS/ODF (OpenShift Data Foundation).
 
-## Required MCP Servers
+## Required CLI Tools
 
 This skill requires:
-- `debug_read` (from the kubectl-debug-queries MCP server) -- for listing resources, logs, events
-- `metrics_read` (from the kubectl-metrics MCP server) -- for Ceph metrics (health, capacity, OSD, PG)
+- `oc metrics` ([kubectl-metrics](https://github.com/yaacov/kubectl-metrics)) -- for Ceph metrics (health, capacity, OSD, PG)
+- `oc debug-queries` ([kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries)) -- for listing resources, logs, events
 
-If any of these tools are not available in your environment, inform the user and refer them to the `mcp-setup` skill for installation instructions. Do not attempt bash fallback.
+If any tool is missing, install with:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
+```
 
 ## 1. Ceph Cluster Health
 
 ### Quick health status via metrics
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_health_status"}
+```bash
+oc metrics query --query "ceph_health_status"
 ```
 
 Health values: 0=OK, 1=WARN, 2=ERR.
 
 ### Capacity overview
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_cluster_total_bytes"}
-metrics_read  command: "query"  flags: {query: "ceph_cluster_total_used_bytes"}
-metrics_read  command: "query"  flags: {query: "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes * 100"}
+```bash
+oc metrics query --query "ceph_cluster_total_bytes"
+oc metrics query --query "ceph_cluster_total_used_bytes"
+oc metrics query --query "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes * 100"
 ```
 
 ### CephCluster CR status
 
-```
-debug_read  command: "get"  flags: {resource: "cephcluster", namespace: "openshift-storage", output: "json"}
+```bash
+oc debug-queries get --resource cephcluster --namespace openshift-storage --output json
 ```
 
 Health states:
@@ -48,66 +53,66 @@ Health states:
 
 ### OSD metrics
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_osd_stat_bytes"}
-metrics_read  command: "query"  flags: {query: "ceph_osd_stat_bytes_used"}
-metrics_read  command: "query"  flags: {query: "rate(ceph_osd_op_latency_sum[5m]) / rate(ceph_osd_op_latency_count[5m])"}
+```bash
+oc metrics query --query "ceph_osd_stat_bytes"
+oc metrics query --query "ceph_osd_stat_bytes_used"
+oc metrics query --query "rate(ceph_osd_op_latency_sum[5m]) / rate(ceph_osd_op_latency_count[5m])"
 ```
 
 ### OSD pods
 
-```
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-storage", selector: "app=rook-ceph-osd"}
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-storage", query: "where name ~= '.*osd-prepare.*'"}
+```bash
+oc debug-queries list --resource pods --namespace openshift-storage --selector "app=rook-ceph-osd"
+oc debug-queries list --resource pods --namespace openshift-storage --query "where name ~= '.*osd-prepare.*'"
 ```
 
 ### OSD backing PVCs
 
-```
-debug_read  command: "list"  flags: {resource: "pvc", namespace: "openshift-storage", selector: "app=rook-ceph-osd"}
+```bash
+oc debug-queries list --resource pvc --namespace openshift-storage --selector "app=rook-ceph-osd"
 ```
 
 ## 3. Placement Group Health
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_pg_total"}
-metrics_read  command: "query"  flags: {query: "ceph_pg_active"}
-metrics_read  command: "query"  flags: {query: "ceph_pg_degraded"}
+```bash
+oc metrics query --query "ceph_pg_total"
+oc metrics query --query "ceph_pg_active"
+oc metrics query --query "ceph_pg_degraded"
 ```
 
 ## 4. Pool Statistics
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_pool_percent_used * 100"}
-metrics_read  command: "query"  flags: {query: "rate(ceph_pool_rd[5m])"}
-metrics_read  command: "query"  flags: {query: "rate(ceph_pool_wr[5m])"}
-metrics_read  command: "query"  flags: {query: "ceph_pool_stored"}
-metrics_read  command: "query"  flags: {query: "ceph_pool_max_avail"}
+```bash
+oc metrics query --query "ceph_pool_percent_used * 100"
+oc metrics query --query "rate(ceph_pool_rd[5m])"
+oc metrics query --query "rate(ceph_pool_wr[5m])"
+oc metrics query --query "ceph_pool_stored"
+oc metrics query --query "ceph_pool_max_avail"
 ```
 
 ## 5. CSI Provisioner Pods
 
 PVC provisioning is handled by CSI driver pods. If these are unhealthy, no volumes can be created.
 
-```
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-storage", query: "where name ~= '.*rbd.*ctrlplugin.*'"}
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-storage", query: "where name ~= '.*cephfs.*ctrlplugin.*'"}
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-storage", query: "where name ~= '.*rbd.*nodeplugin.*'"}
+```bash
+oc debug-queries list --resource pods --namespace openshift-storage --query "where name ~= '.*rbd.*ctrlplugin.*'"
+oc debug-queries list --resource pods --namespace openshift-storage --query "where name ~= '.*cephfs.*ctrlplugin.*'"
+oc debug-queries list --resource pods --namespace openshift-storage --query "where name ~= '.*rbd.*nodeplugin.*'"
 ```
 
 Check CSI provisioner logs:
 
-```
-debug_read  command: "logs"  flags: {name: "<rbd-ctrlplugin-pod>", namespace: "openshift-storage", container: "csi-rbdplugin", tail: 50}
+```bash
+oc debug-queries logs --name <rbd-ctrlplugin-pod> --namespace openshift-storage --container csi-rbdplugin --tail 50
 ```
 
 ## 6. PVC and PV Diagnosis
 
-```
-debug_read  command: "list"  flags: {resource: "pvc", all_namespaces: true, query: "where status.phase = 'Pending'"}
-debug_read  command: "get"   flags: {resource: "pvc", name: "<pvc-name>", namespace: "<namespace>"}
-debug_read  command: "list"  flags: {resource: "pv", query: "where status.phase = 'Released'"}
-debug_read  command: "list"  flags: {resource: "storageclass"}
+```bash
+oc debug-queries list --resource pvc --all-namespaces --query "where status.phase = 'Pending'"
+oc debug-queries get --resource pvc --name <pvc-name> --namespace <namespace>
+oc debug-queries list --resource pv --all-namespaces --query "where status.phase = 'Released'"
+oc debug-queries list --resource storageclass --all-namespaces
 ```
 
 ## 7. Common Problems and Remediation
@@ -118,15 +123,15 @@ debug_read  command: "list"  flags: {resource: "storageclass"}
 
 **Diagnosis**:
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_health_status"}
-metrics_read  command: "query"  flags: {query: "ceph_osd_stat_bytes_used / ceph_osd_stat_bytes * 100"}
-debug_read   command: "get"    flags: {resource: "cephcluster", namespace: "openshift-storage", output: "json"}
+```bash
+oc metrics query --query "ceph_health_status"
+oc metrics query --query "ceph_osd_stat_bytes_used / ceph_osd_stat_bytes * 100"
+oc debug-queries get --resource cephcluster --namespace openshift-storage --output json
 ```
 
 Look for `OSD_FULL` and `POOL_FULL` messages in the CephCluster status.
 
-**Remediation**: See "Requires Shell" section below for `kubectl delete pv` and `ceph osd set-full-ratio`.
+**Remediation**: See "Requires Shell" section below for `oc delete pv` and `ceph osd set-full-ratio`.
 
 ### OSDs Nearfull / Backfillfull (HEALTH_WARN)
 
@@ -143,10 +148,10 @@ Look for `OSD_FULL` and `POOL_FULL` messages in the CephCluster status.
 
 **Diagnosis**:
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_pg_degraded"}
-metrics_read  command: "query"  flags: {query: "ceph_pg_total - ceph_pg_active"}
-debug_read   command: "events"  flags: {namespace: "openshift-storage", query: "where type = 'Warning'"}
+```bash
+oc metrics query --query "ceph_pg_degraded"
+oc metrics query --query "ceph_pg_total - ceph_pg_active"
+oc debug-queries events --namespace openshift-storage --query "where type = 'Warning'"
 ```
 
 **Remediation**:
@@ -160,9 +165,9 @@ debug_read   command: "events"  flags: {namespace: "openshift-storage", query: "
 
 **Diagnosis**:
 
-```
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-storage", query: "where name ~= '.*ctrlplugin.*'"}
-debug_read  command: "logs"  flags: {name: "<rbd-ctrlplugin-pod>", namespace: "openshift-storage", container: "csi-rbdplugin", tail: 100}
+```bash
+oc debug-queries list --resource pods --namespace openshift-storage --query "where name ~= '.*ctrlplugin.*'"
+oc debug-queries logs --name <rbd-ctrlplugin-pod> --namespace openshift-storage --container csi-rbdplugin --tail 100
 ```
 
 **Remediation**:
@@ -176,9 +181,9 @@ debug_read  command: "logs"  flags: {name: "<rbd-ctrlplugin-pod>", namespace: "o
 
 **Diagnosis**:
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_pool_percent_used * 100"}
-metrics_read  command: "query"  flags: {query: "ceph_osd_stat_bytes_used / ceph_osd_stat_bytes * 100"}
+```bash
+oc metrics query --query "ceph_pool_percent_used * 100"
+oc metrics query --query "ceph_osd_stat_bytes_used / ceph_osd_stat_bytes * 100"
 ```
 
 **Remediation**:
@@ -187,25 +192,25 @@ metrics_read  command: "query"  flags: {query: "ceph_osd_stat_bytes_used / ceph_
 
 ## 8. Operator Health
 
-```
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-storage", query: "where name ~= '.*ocs-operator.*|.*odf-operator.*|.*rook-ceph-operator.*'"}
-debug_read  command: "logs"  flags: {name: "deployment/rook-ceph-operator", namespace: "openshift-storage", tail: 50}
+```bash
+oc debug-queries list --resource pods --namespace openshift-storage --query "where name ~= '.*ocs-operator.*|.*odf-operator.*|.*rook-ceph-operator.*'"
+oc debug-queries logs --name deployment/rook-ceph-operator --namespace openshift-storage --tail 50
 ```
 
 Check for high restart counts:
 
-```
-metrics_read  command: "query"  flags: {query: "topk(10, sort_desc(kube_pod_container_status_restarts_total))"}
+```bash
+oc metrics query --query "topk(10, sort_desc(kube_pod_container_status_restarts_total))"
 ```
 
 ## 9. Preventive Checks
 
 Run these periodically to avoid surprise outages:
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes * 100"}
-debug_read   command: "list"   flags: {resource: "pv", query: "where status.phase = 'Released'"}
-debug_read   command: "list"   flags: {resource: "pvc", all_namespaces: true, query: "where status.phase = 'Pending'"}
+```bash
+oc metrics query --query "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes * 100"
+oc debug-queries list --resource pv --all-namespaces --query "where status.phase = 'Released'"
+oc debug-queries list --resource pvc --all-namespaces --query "where status.phase = 'Pending'"
 ```
 
 Act when usage exceeds 70% -- start cleaning up or expanding capacity before hitting the 85% full threshold.
@@ -214,39 +219,38 @@ Act when usage exceeds 70% -- start cleaning up or expanding capacity before hit
 
 ## Requires Shell
 
-These remediation operations cannot be performed via MCP and require shell access:
+These remediation operations require shell access:
 
 ### Delete Released PVs to reclaim space
 
 ```bash
-kubectl get pv --field-selector status.phase=Released
-kubectl delete pv <released-pv-names>
+oc get pv --field-selector status.phase=Released
+oc delete pv <released-pv-names>
 ```
 
 ### Temporarily raise the full ratio (when Ceph is blocking all writes)
 
 ```bash
-MON_POD=$(kubectl -n openshift-storage get pods -l app=rook-ceph-mon -o jsonpath='{.items[0].metadata.name}')
-MON_ADDR=$(kubectl -n openshift-storage get pod $MON_POD -o jsonpath='{.spec.containers[0].env[?(@.name=="ROOK_CEPH_MON_HOST")].value}' | sed 's/\[//;s/\]//')
+MON_POD=$(oc -n openshift-storage get pods -l app=rook-ceph-mon -o jsonpath='{.items[0].metadata.name}')
+MON_ADDR=$(oc -n openshift-storage get pod $MON_POD -o jsonpath='{.spec.containers[0].env[?(@.name=="ROOK_CEPH_MON_HOST")].value}' | sed 's/\[//;s/\]//')
 
 # Raise to 0.92 to unblock writes temporarily
-kubectl -n openshift-storage exec $MON_POD -c mon -- \
+oc -n openshift-storage exec $MON_POD -c mon -- \
   ceph -m $MON_ADDR --keyring /etc/ceph/keyring-store/keyring \
   osd set-full-ratio 0.92
 
 # After space is freed, reset to default
-kubectl -n openshift-storage exec $MON_POD -c mon -- \
+oc -n openshift-storage exec $MON_POD -c mon -- \
   ceph -m $MON_ADDR --keyring /etc/ceph/keyring-store/keyring \
   osd set-full-ratio 0.85
 ```
 
 ## Self-Learning Rule
 
-When you need to discover available flags, build custom Ceph queries, or verify syntax:
+When you need to discover available flags or verify syntax:
 
-```
-debug_help  command: "list"
-debug_help  command: "logs"
-metrics_help  command: "query"
-metrics_help  command: "promql"
+```bash
+oc debug-queries list --help
+oc debug-queries logs --help
+oc metrics query --help
 ```

@@ -7,53 +7,58 @@ description: General OpenShift (OCP) cluster health check. Use when the cluster 
 
 Use this guide for general OCP cluster health diagnosis and remediation.
 
-## Required MCP Servers
+## Required CLI Tools
 
 This skill requires:
-- `debug_read` (from the kubectl-debug-queries MCP server) -- for listing resources, logs, events
-- `metrics_read` (from the kubectl-metrics MCP server) -- for CPU/memory/node metrics
+- `oc debug-queries` ([kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries)) -- for listing resources, logs, events
+- `oc metrics` ([kubectl-metrics](https://github.com/yaacov/kubectl-metrics)) -- for CPU/memory/node metrics
 
-If any of these tools are not available in your environment, inform the user and refer them to the `mcp-setup` skill for installation instructions. Do not attempt bash fallback.
+If any tool is missing, install with:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
+```
 
 ## Quick Triage
 
 Check these in order for a fast overview:
 
-```
-debug_read   command: "list"    flags: {resource: "nodes"}
-debug_read   command: "list"    flags: {resource: "clusteroperators"}
-debug_read   command: "list"    flags: {resource: "pods", all_namespaces: true, query: "where status.phase != 'Running' and status.phase != 'Succeeded'", limit: 30}
-debug_read   command: "events"  flags: {all_namespaces: true, query: "where type = 'Warning'", sort_by: "time_desc", limit: 20}
+```bash
+oc debug-queries list --resource nodes --all-namespaces
+oc debug-queries list --resource clusteroperators --all-namespaces
+oc debug-queries list --resource pods --all-namespaces --query "where status.phase != 'Running' and status.phase != 'Succeeded'" --limit 30
+oc debug-queries events --all-namespaces --query "where type = 'Warning'" --sort-by time_desc --limit 20
 ```
 
 ## 1. Nodes
 
-```
-debug_read  command: "list"  flags: {resource: "nodes"}
-debug_read  command: "get"   flags: {resource: "node", name: "<node-name>"}
+```bash
+oc debug-queries list --resource nodes --all-namespaces
+oc debug-queries get --resource node --name <node-name> --namespace default
 ```
 
 Resource usage:
 
-```
-metrics_read  command: "query"  flags: {query: "avg(instance:node_cpu:ratio) * 100"}
-metrics_read  command: "query"  flags: {query: "(1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)) * 100"}
-metrics_read  command: "query"  flags: {query: "sum(kube_node_status_condition{condition='Ready',status='true'})"}
+```bash
+oc metrics query --query "avg(instance:node_cpu:ratio) * 100"
+oc metrics query --query "(1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)) * 100"
+oc metrics query --query "sum(kube_node_status_condition{condition='Ready',status='true'})"
 ```
 
 Pods on a specific node:
 
-```
-debug_read  command: "list"  flags: {resource: "pods", all_namespaces: true, query: "where spec.nodeName = '<node-name>'"}
+```bash
+oc debug-queries list --resource pods --all-namespaces --query "where spec.nodeName = '<node-name>'"
 ```
 
 ### Node NotReady
 
 **Diagnosis**:
 
-```
-debug_read  command: "get"     flags: {resource: "node", name: "<node-name>"}
-debug_read  command: "events"  flags: {all_namespaces: true, name: "<node-name>", sort_by: "time_desc"}
+```bash
+oc debug-queries get --resource node --name <node-name> --namespace default
+oc debug-queries events --all-namespaces --name <node-name> --sort-by time_desc
 ```
 
 **Common causes**:
@@ -69,9 +74,9 @@ debug_read  command: "events"  flags: {all_namespaces: true, name: "<node-name>"
 
 ## 2. Cluster Operators
 
-```
-debug_read  command: "list"  flags: {resource: "clusteroperators"}
-debug_read  command: "get"   flags: {resource: "clusteroperator", name: "<operator-name>"}
+```bash
+oc debug-queries list --resource clusteroperators --all-namespaces
+oc debug-queries get --resource clusteroperator --name <operator-name> --namespace default
 ```
 
 Key operators to watch: `etcd`, `kube-apiserver`, `openshift-controller-manager`, `ingress`, `monitoring`, `storage`, `machine-config`.
@@ -80,23 +85,23 @@ Key operators to watch: `etcd`, `kube-apiserver`, `openshift-controller-manager`
 
 **Diagnosis**: Check the operator's namespace for unhealthy pods:
 
-```
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-<operator-name>", query: "where status.phase != 'Running'"}
-debug_read  command: "logs"  flags: {name: "<pod-name>", namespace: "openshift-<operator-name>", tail: 50}
+```bash
+oc debug-queries list --resource pods --namespace openshift-<operator-name> --query "where status.phase != 'Running'"
+oc debug-queries logs --name <pod-name> --namespace openshift-<operator-name> --tail 50
 ```
 
 Before writing log queries, discover the actual field names and level values:
 
-```
-debug_read  command: "logs"  flags: {name: "<pod-name>", namespace: "openshift-<operator-name>", tail: 5, output: "json"}
+```bash
+oc debug-queries logs --name <pod-name> --namespace openshift-<operator-name> --tail 5 --output json
 ```
 
-Level strings vary by workload. Controller-runtime logs normalize to `ERROR`, `WARN`, `INFO`, `DEBUG`. klog-format logs (used by etcd and other Kubernetes components) may normalize to `E`, `W`, `I`, `F`. Always check with `output: "json"` first to see actual level values.
+Level strings vary by workload. Controller-runtime logs normalize to `ERROR`, `WARN`, `INFO`, `DEBUG`. klog-format logs (used by etcd and other Kubernetes components) may normalize to `E`, `W`, `I`, `F`. Always check with `--output json` first to see actual level values.
 
 Full-text search when you don't know which field contains the value:
 
-```
-debug_read  command: "logs"  flags: {name: "<pod-name>", namespace: "openshift-<operator-name>", tail: 200, query: "where raw_line ~= '.*<search-term>.*'"}
+```bash
+oc debug-queries logs --name <pod-name> --namespace openshift-<operator-name> --tail 200 --query "where raw_line ~= '.*<search-term>.*'"
 ```
 
 **Remediation**:
@@ -106,10 +111,10 @@ debug_read  command: "logs"  flags: {name: "<pod-name>", namespace: "openshift-<
 
 ## 3. etcd Health
 
-```
-debug_read  command: "get"   flags: {resource: "clusteroperator", name: "etcd"}
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-etcd", selector: "app=etcd"}
-debug_read  command: "logs"  flags: {name: "deployment/etcd-operator", namespace: "openshift-etcd-operator", tail: 50, query: "where level = 'ERROR' or level = 'WARN'"}
+```bash
+oc debug-queries get --resource clusteroperator --name etcd --namespace default
+oc debug-queries list --resource pods --namespace openshift-etcd --selector "app=etcd"
+oc debug-queries logs --name deployment/etcd-operator --namespace openshift-etcd-operator --tail 50 --query "where level = 'ERROR' or level = 'WARN'"
 ```
 
 ### etcd Slow or Degraded
@@ -126,31 +131,31 @@ debug_read  command: "logs"  flags: {name: "deployment/etcd-operator", namespace
 
 ## 4. API Server
 
-```
-debug_read  command: "list"    flags: {resource: "pods", namespace: "openshift-kube-apiserver", selector: "app=openshift-kube-apiserver"}
-debug_read  command: "events"  flags: {namespace: "openshift-kube-apiserver", sort_by: "time_desc", limit: 10}
+```bash
+oc debug-queries list --resource pods --namespace openshift-kube-apiserver --selector "app=openshift-kube-apiserver"
+oc debug-queries events --namespace openshift-kube-apiserver --sort-by time_desc --limit 10
 ```
 
 ## 5. Pods and Workloads
 
-```
-debug_read  command: "list"  flags: {resource: "pods", all_namespaces: true, query: "where status.phase = 'Failed'", limit: 20}
-debug_read  command: "list"  flags: {resource: "pods", all_namespaces: true, query: "where status.phase = 'Pending'"}
+```bash
+oc debug-queries list --resource pods --all-namespaces --query "where status.phase = 'Failed'" --limit 20
+oc debug-queries list --resource pods --all-namespaces --query "where status.phase = 'Pending'"
 ```
 
 Pods with high restart counts:
 
-```
-metrics_read  command: "query"  flags: {query: "topk(10, sort_desc(kube_pod_container_status_restarts_total))"}
+```bash
+oc metrics query --query "topk(10, sort_desc(kube_pod_container_status_restarts_total))"
 ```
 
 ### CrashLoopBackOff
 
 **Diagnosis**:
 
-```
-debug_read  command: "get"   flags: {resource: "pod", name: "<pod-name>", namespace: "<namespace>"}
-debug_read  command: "logs"  flags: {name: "<pod-name>", namespace: "<namespace>", previous: true}
+```bash
+oc debug-queries get --resource pod --name <pod-name> --namespace <namespace>
+oc debug-queries logs --name <pod-name> --namespace <namespace> --previous
 ```
 
 **Common causes**: missing config/secrets, OOM, application errors, image issues.
@@ -159,71 +164,71 @@ debug_read  command: "logs"  flags: {name: "<pod-name>", namespace: "<namespace>
 
 **Diagnosis**:
 
-```
-debug_read  command: "events"  flags: {namespace: "<namespace>", name: "<pod-name>", resource: "Pod"}
+```bash
+oc debug-queries events --namespace <namespace> --name <pod-name> --resource Pod
 ```
 
 **Common causes**: wrong image name, registry auth missing, network issues to registry.
 
 ## 6. Networking
 
-```
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-ingress"}
-debug_read  command: "get"   flags: {resource: "clusteroperator", name: "network"}
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-network-operator"}
+```bash
+oc debug-queries list --resource pods --namespace openshift-ingress
+oc debug-queries get --resource clusteroperator --name network --namespace default
+oc debug-queries list --resource pods --namespace openshift-network-operator
 ```
 
 ### Service/Route Not Reachable
 
 **Diagnosis**:
 
-```
-debug_read  command: "list"  flags: {resource: "endpoints", namespace: "<namespace>"}
-debug_read  command: "list"  flags: {resource: "pods", namespace: "openshift-ingress"}
-debug_read  command: "logs"  flags: {name: "<router-pod>", namespace: "openshift-ingress", tail: 20}
+```bash
+oc debug-queries list --resource endpoints --namespace <namespace>
+oc debug-queries list --resource pods --namespace openshift-ingress
+oc debug-queries logs --name <router-pod> --namespace openshift-ingress --tail 20
 ```
 
 ## 7. Certificates
 
-```
-debug_read  command: "list"  flags: {resource: "certificates", all_namespaces: true}
-debug_read  command: "get"   flags: {resource: "clusteroperator", name: "kube-apiserver"}
+```bash
+oc debug-queries list --resource certificates --all-namespaces
+oc debug-queries get --resource clusteroperator --name kube-apiserver --namespace default
 ```
 
 ## 8. MachineConfigPool (Node Updates)
 
-```
-debug_read  command: "list"  flags: {resource: "machineconfigpool"}
-debug_read  command: "get"   flags: {resource: "machineconfigpool", name: "worker"}
-debug_read  command: "get"   flags: {resource: "machineconfigpool", name: "master"}
+```bash
+oc debug-queries list --resource machineconfigpool --all-namespaces
+oc debug-queries get --resource machineconfigpool --name worker --namespace default
+oc debug-queries get --resource machineconfigpool --name master --namespace default
 ```
 
 ### Nodes Stuck Updating
 
 **Diagnosis**:
 
-```
-debug_read  command: "list"  flags: {resource: "machineconfigpool", output: "json"}
+```bash
+oc debug-queries list --resource machineconfigpool --all-namespaces --output json
 ```
 
 **Remediation**:
 - Check the machine-config-daemon pod on the stuck node
-- Review logs: `debug_read` logs for the machine-config-daemon pod on that node
+- Review logs for the machine-config-daemon pod on that node
 - A degraded MCP often means a config failed to apply -- fix the MachineConfig or remove it
 
 ## 9. Cluster Version and Updates
 
-```
-debug_read  command: "list"  flags: {resource: "clusterversion"}
-debug_read  command: "get"   flags: {resource: "clusterversion", name: "version"}
+```bash
+oc debug-queries list --resource clusterversion --all-namespaces
+oc debug-queries get --resource clusterversion --name version --namespace default
 ```
 
 ## 10. Resource Quotas and Limits
 
-```
-debug_read  command: "list"  flags: {resource: "resourcequota", all_namespaces: true}
-debug_read  command: "list"  flags: {resource: "limitrange", all_namespaces: true}
-debug_read  command: "get"   flags: {resource: "resourcequota", name: "<quota-name>", namespace: "<namespace>"}
+```bash
+oc debug-queries list --resource resourcequota --all-namespaces
+oc debug-queries list --resource limitrange --all-namespaces
+oc debug-queries get --resource resourcequota --name <quota-name> --namespace <namespace>
 ```
 
 ## 11. Full Health Report
@@ -232,26 +237,26 @@ When the user asks for a cluster health report, run these commands **in parallel
 
 **Cluster & nodes:**
 
-```
-debug_read   command: "list"    flags: {resource: "clusterversion"}
-debug_read   command: "list"    flags: {resource: "nodes"}
-debug_read   command: "list"    flags: {resource: "clusteroperators"}
-debug_read   command: "list"    flags: {resource: "pods", all_namespaces: true, query: "where status.phase != 'Running' and status.phase != 'Succeeded'", limit: 15}
+```bash
+oc debug-queries list --resource clusterversion --all-namespaces
+oc debug-queries list --resource nodes --all-namespaces
+oc debug-queries list --resource clusteroperators --all-namespaces
+oc debug-queries list --resource pods --all-namespaces --query "where status.phase != 'Running' and status.phase != 'Succeeded'" --limit 15
 ```
 
 **Resource usage:**
 
-```
-metrics_read  command: "query"  flags: {query: "avg(instance:node_cpu:ratio) * 100"}
-metrics_read  command: "query"  flags: {query: "(1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)) * 100"}
-metrics_read  command: "query"  flags: {query: "sum(kube_node_status_condition{condition='Ready',status='true'})"}
+```bash
+oc metrics query --query "avg(instance:node_cpu:ratio) * 100"
+oc metrics query --query "(1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)) * 100"
+oc metrics query --query "sum(kube_node_status_condition{condition='Ready',status='true'})"
 ```
 
 **Storage health:**
 
-```
-metrics_read  command: "query"  flags: {query: "ceph_health_status"}
-metrics_read  command: "query"  flags: {query: "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes * 100"}
+```bash
+oc metrics query --query "ceph_health_status"
+oc metrics query --query "ceph_cluster_total_used_bytes / ceph_cluster_total_bytes * 100"
 ```
 
 ### How to present the report
@@ -268,47 +273,46 @@ Flag any issues found with brief remediation hints. If everything is healthy, sa
 
 ## Requires Shell
 
-These operations cannot be performed via MCP and require shell access:
+These operations require shell access:
 
 ### API server raw health check
 
 ```bash
-kubectl get --raw /healthz
+oc get --raw /healthz
 ```
 
 ### etcd member health (exec into etcd pod)
 
 ```bash
-kubectl -n openshift-etcd exec $(kubectl -n openshift-etcd get pods -l app=etcd -o jsonpath='{.items[0].metadata.name}') -c etcd -- \
+oc -n openshift-etcd exec $(oc -n openshift-etcd get pods -l app=etcd -o jsonpath='{.items[0].metadata.name}') -c etcd -- \
   etcdctl member list -w table
 
-kubectl -n openshift-etcd exec $(kubectl -n openshift-etcd get pods -l app=etcd -o jsonpath='{.items[0].metadata.name}') -c etcd -- \
+oc -n openshift-etcd exec $(oc -n openshift-etcd get pods -l app=etcd -o jsonpath='{.items[0].metadata.name}') -c etcd -- \
   etcdctl endpoint health --cluster -w table
 
-kubectl -n openshift-etcd exec $(kubectl -n openshift-etcd get pods -l app=etcd -o jsonpath='{.items[0].metadata.name}') -c etcd -- \
+oc -n openshift-etcd exec $(oc -n openshift-etcd get pods -l app=etcd -o jsonpath='{.items[0].metadata.name}') -c etcd -- \
   etcdctl endpoint status --cluster -w table
 ```
 
 ### DNS resolution test
 
 ```bash
-kubectl run dns-test --rm -i --restart=Never --image=busybox -- nslookup kubernetes.default.svc.cluster.local
+oc run dns-test --rm -i --restart=Never --image=busybox -- nslookup kubernetes.default.svc.cluster.local
 ```
 
 ### Certificate expiry inspection
 
 ```bash
-kubectl get secret -n openshift-kube-apiserver -o json | \
+oc get secret -n openshift-kube-apiserver -o json | \
   python3 -c "import json,sys; [print(i['metadata']['name']) for i in json.load(sys.stdin)['items'] if 'cert' in i['metadata']['name'].lower()]" 2>/dev/null
 ```
 
 ## Self-Learning Rule
 
-When you need to discover available flags or verify syntax, call the MCP help tools:
+When you need to discover available flags or verify syntax:
 
-```
-debug_help  command: "list"
-debug_help  command: "logs"
-metrics_help  command: "query"
-metrics_help  command: "promql"
+```bash
+oc debug-queries list --help
+oc debug-queries logs --help
+oc metrics query --help
 ```

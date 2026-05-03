@@ -1,12 +1,12 @@
-# kubectl virt Installation
+# oc virt Installation
 
-Installation, PATH setup, and shell completion for `kubectl virt` (virtctl).
+Installation, PATH setup, and shell completion for `oc virt` (virtctl). `kubectl virt` also works as an alias.
 
 See the main [SKILL.md](SKILL.md) for VM creation workflows and common operations.
 
 ---
 
-## Via krew (simplest)
+## Via krew
 
 ```bash
 kubectl krew install virt
@@ -17,11 +17,11 @@ Krew handles the `kubectl-virt` binary and shell completion automatically.
 ## Manual download
 
 Download `virtctl` from the KubeVirt GitHub releases and install it as `kubectl-virt`
-so that `kubectl virt` discovers it as a plugin.
+so that `oc virt` discovers it as a plugin.
 
 ```bash
 # Option A: match the version running on your cluster
-VERSION=$(kubectl get kubevirt.kubevirt.io/kubevirt -n kubevirt \
+VERSION=$(oc get kubevirt.kubevirt.io/kubevirt -n kubevirt \
   -o jsonpath="{.status.observedKubeVirtVersion}")
 
 # Option B: use the latest stable release
@@ -52,15 +52,13 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 Verify:
 
 ```bash
-kubectl virt --help
+oc virt --help
 ```
-
-Note: `oc virt` works as an alias on OpenShift clusters.
 
 ## Shell Completion (Autocomplete)
 
 If you installed via krew, completion is handled automatically. For manual installs,
-create a `kubectl_complete-virt` helper so that `kubectl virt <TAB>` works.
+create a `kubectl_complete-virt` helper so that `oc virt <TAB>` works.
 This follows the same pattern used by kubectl-mtv and kubectl-metrics.
 
 ```bash
@@ -74,4 +72,4 @@ chmod +x ~/.local/bin/kubectl_complete-virt
 ln -sf ~/.local/bin/kubectl_complete-virt ~/.local/bin/oc_complete-virt
 ```
 
-After this, tab-completion works for both `kubectl virt` and `oc virt` commands.
+After this, tab-completion works for both `oc virt` and `kubectl virt` commands.

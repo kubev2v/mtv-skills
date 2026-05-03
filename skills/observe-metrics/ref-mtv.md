@@ -6,94 +6,82 @@ Queries, labels, and metrics for Forklift/MTV VM migrations. See [SKILL.md](SKIL
 
 ### Instant snapshot
 
-```
-metrics_read  command: "query"  flags: {query: "sum by (status)(mtv_migrations_status_total)"}
-metrics_read  command: "query"  flags: {query: "sum by (status)(mtv_plans_status)"}
+```bash
+oc metrics query --query "sum by (status)(mtv_migrations_status_total)"
+oc metrics query --query "sum by (status)(mtv_plans_status)"
 ```
 
 ### Status trend over time
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["sum by (status)(mtv_migrations_status_total)",
-          "sum by (status)(mtv_plans_status)"],
-  name: ["migration_status", "plan_status"],
-  start: "-6h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "sum by (status)(mtv_migrations_status_total)" \
+  --query "sum by (status)(mtv_plans_status)" \
+  --name migration_status --name plan_status \
+  --start "-6h" --step 60s
 ```
 
 ## Migration data transfer and throughput
 
 ### Trend over time (throughput combined in one call)
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["sum(mtv_migration_net_throughput)",
-          "sum(mtv_migration_storage_throughput)"],
-  name: ["net_throughput", "storage_throughput"],
-  start: "-2h",
-  step: "30s"
-}
+```bash
+oc metrics query-range \
+  --query "sum(mtv_migration_net_throughput)" \
+  --query "sum(mtv_migration_storage_throughput)" \
+  --name net_throughput --name storage_throughput \
+  --start "-2h" --step 30s
 ```
 
 ### Data transferred + duration trend
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["sum(mtv_migration_data_transferred_bytes)",
-          "sum(mtv_migration_duration_seconds)"],
-  name: ["data_bytes", "duration_sec"],
-  start: "-6h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "sum(mtv_migration_data_transferred_bytes)" \
+  --query "sum(mtv_migration_duration_seconds)" \
+  --name data_bytes --name duration_sec \
+  --start "-6h" --step 60s
 ```
 
 ### Instant snapshot
 
-```
-metrics_read  command: "query"  flags: {query: "sum(mtv_migration_data_transferred_bytes)"}
-metrics_read  command: "query"  flags: {query: "avg(mtv_migration_duration_seconds)"}
+```bash
+oc metrics query --query "sum(mtv_migration_data_transferred_bytes)"
+oc metrics query --query "avg(mtv_migration_duration_seconds)"
 ```
 
 ## Migration pod CPU and network traffic
 
 ### Trend over time (RX + TX combined in one call)
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["sum by (pod)(rate(container_network_receive_bytes_total{namespace=\"konveyor-forklift\",pod=~\".*populator.*|.*importer.*\"}[5m]))",
-          "sum by (pod)(rate(container_network_transmit_bytes_total{namespace=\"konveyor-forklift\",pod=~\".*populator.*|.*importer.*\"}[5m]))"],
-  name: ["migration_pod_rx", "migration_pod_tx"],
-  start: "-2h",
-  step: "30s"
-}
+```bash
+oc metrics query-range \
+  --query "sum by (pod)(rate(container_network_receive_bytes_total{namespace=\"konveyor-forklift\",pod=~\".*populator.*|.*importer.*\"}[5m]))" \
+  --query "sum by (pod)(rate(container_network_transmit_bytes_total{namespace=\"konveyor-forklift\",pod=~\".*populator.*|.*importer.*\"}[5m]))" \
+  --name migration_pod_rx --name migration_pod_tx \
+  --start "-2h" --step 30s
 ```
 
 ### Populator CPU + all-forklift traffic
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["sum(rate(container_cpu_usage_seconds_total{namespace=\"konveyor-forklift\",pod=~\".*populator.*\"}[5m]))",
-          "sum(rate(container_network_receive_bytes_total{namespace=\"konveyor-forklift\"}[5m])) + sum(rate(container_network_transmit_bytes_total{namespace=\"konveyor-forklift\"}[5m]))"],
-  name: ["populator_cpu_cores", "forklift_traffic_bytes_per_sec"],
-  start: "-2h",
-  step: "30s"
-}
+```bash
+oc metrics query-range \
+  --query "sum(rate(container_cpu_usage_seconds_total{namespace=\"konveyor-forklift\",pod=~\".*populator.*\"}[5m]))" \
+  --query "sum(rate(container_network_receive_bytes_total{namespace=\"konveyor-forklift\"}[5m])) + sum(rate(container_network_transmit_bytes_total{namespace=\"konveyor-forklift\"}[5m]))" \
+  --name populator_cpu_cores --name forklift_traffic_bytes_per_sec \
+  --start "-2h" --step 30s
 ```
 
 ## KubeVirt VMI migration metrics
 
 ### Pending + running VMI migrations (combined in one call)
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["sum(kubevirt_vmi_migrations_in_pending_phase)",
-          "sum(kubevirt_vmi_migrations_in_running_phase)"],
-  name: ["pending", "running"],
-  start: "-2h",
-  step: "30s"
-}
+```bash
+oc metrics query-range \
+  --query "sum(kubevirt_vmi_migrations_in_pending_phase)" \
+  --query "sum(kubevirt_vmi_migrations_in_running_phase)" \
+  --name pending --name running \
+  --start "-2h" --step 30s
 ```
 
 ## Available labels on mtv_* metrics
@@ -129,20 +117,20 @@ All `mtv_*` metrics share these labels for filtering and grouping:
 
 Use PromQL label selectors directly in the query to narrow results:
 
-```
-metrics_read  command: "query"  flags: {query: "mtv_migration_data_transferred_bytes{provider=\"vsphere\"}"}
-metrics_read  command: "query"  flags: {query: "mtv_migration_data_transferred_bytes{mode=\"Cold\"}"}
-metrics_read  command: "query"  flags: {query: "mtv_migration_data_transferred_bytes{provider=\"ovirt\", mode=\"Warm\"}"}
-metrics_read  command: "query"  flags: {query: "mtv_migrations_status_total{status=\"Failed\"}"}
-metrics_read  command: "query"  flags: {query: "mtv_workload_migrations_status_total{plan=\"PLAN_UUID\", status=\"Failed\"}"}
+```bash
+oc metrics query --query "mtv_migration_data_transferred_bytes{provider=\"vsphere\"}"
+oc metrics query --query "mtv_migration_data_transferred_bytes{mode=\"Cold\"}"
+oc metrics query --query "mtv_migration_data_transferred_bytes{provider=\"ovirt\", mode=\"Warm\"}"
+oc metrics query --query "mtv_migrations_status_total{status=\"Failed\"}"
+oc metrics query --query "mtv_workload_migrations_status_total{plan=\"PLAN_UUID\", status=\"Failed\"}"
 ```
 
 ## Grouping migration metrics
 
-```
-metrics_read  command: "query"  flags: {query: "sum by (provider)(mtv_migration_data_transferred_bytes)"}
-metrics_read  command: "query"  flags: {query: "sum by (mode)(mtv_migration_data_transferred_bytes)"}
-metrics_read  command: "query"  flags: {query: "sum by (status, provider)(mtv_migrations_status_total)"}
-metrics_read  command: "query"  flags: {query: "avg by (provider)(mtv_migration_duration_seconds)"}
-metrics_read  command: "query"  flags: {query: "sum by (plan, status)(mtv_workload_migrations_status_total)"}
+```bash
+oc metrics query --query "sum by (provider)(mtv_migration_data_transferred_bytes)"
+oc metrics query --query "sum by (mode)(mtv_migration_data_transferred_bytes)"
+oc metrics query --query "sum by (status, provider)(mtv_migrations_status_total)"
+oc metrics query --query "avg by (provider)(mtv_migration_duration_seconds)"
+oc metrics query --query "sum by (plan, status)(mtv_workload_migrations_status_total)"
 ```

@@ -6,51 +6,47 @@ Queries, labels, and metrics for pod/container statistics. See [SKILL.md](SKILL.
 
 ### Trend over time (CPU + memory combined in one call)
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: ["topk(10, sort_desc(sum by (namespace)(rate(container_cpu_usage_seconds_total[5m]))))",
-          "topk(10, sort_desc(sum by (namespace)(container_memory_working_set_bytes)))"],
-  name: ["cpu_cores", "mem_bytes"],
-  start: "-1h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "topk(10, sort_desc(sum by (namespace)(rate(container_cpu_usage_seconds_total[5m]))))" \
+  --query "topk(10, sort_desc(sum by (namespace)(container_memory_working_set_bytes)))" \
+  --name cpu_cores --name mem_bytes \
+  --start "-1h" --step 60s
 ```
 
 ### Instant snapshot
 
-```
-metrics_read  command: "query"  flags: {query: "topk(10, sort_desc(sum by (namespace)(rate(container_cpu_usage_seconds_total[5m]))))"}
-metrics_read  command: "query"  flags: {query: "topk(10, sort_desc(sum by (namespace)(container_memory_working_set_bytes)))"}
+```bash
+oc metrics query --query "topk(10, sort_desc(sum by (namespace)(rate(container_cpu_usage_seconds_total[5m]))))"
+oc metrics query --query "topk(10, sort_desc(sum by (namespace)(container_memory_working_set_bytes)))"
 ```
 
 ## Pod status and restarts
 
 ### Pod phase summary
 
-```
-metrics_read  command: "query"  flags: {query: "count by (phase)(kube_pod_status_phase == 1)"}
+```bash
+oc metrics query --query "count by (phase)(kube_pod_status_phase == 1)"
 ```
 
 ### Top restarting containers
 
-```
-metrics_read  command: "query"  flags: {query: "topk(10, sort_desc(kube_pod_container_status_restarts_total))"}
+```bash
+oc metrics query --query "topk(10, sort_desc(kube_pod_container_status_restarts_total))"
 ```
 
 ### Restart rate trend
 
-```
-metrics_read  command: "query_range"  flags: {
-  query: "topk(10, sort_desc(increase(kube_pod_container_status_restarts_total[10m])))",
-  start: "-2h",
-  step: "60s"
-}
+```bash
+oc metrics query-range \
+  --query "topk(10, sort_desc(increase(kube_pod_container_status_restarts_total[10m])))" \
+  --start "-2h" --step 60s
 ```
 
 ## Pod count by namespace
 
-```
-metrics_read  command: "query"  flags: {query: "topk(15, count by (namespace)(kube_pod_info))"}
+```bash
+oc metrics query --query "topk(15, count by (namespace)(kube_pod_info))"
 ```
 
 ## Available labels on pod/container metrics
