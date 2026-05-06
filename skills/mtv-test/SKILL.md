@@ -1,6 +1,12 @@
 ---
-name: mtv-verify-script
-description: Generate and run a self-contained bash verification script for an MTV/Forklift bug or feature. Use this skill when the user asks to "create a verification script", "write a test script", "generate a bash test", "create an e2e test script", "write a verification bash script", "test a fix", "verify a bug fix", "verify a feature", "create a script to test", "create a script to verify", "write a script to verify", "write a script to test", or "create a test for MTV-<number>" for MTV/Forklift.
+name: mtv-test
+description: >-
+  Generate, review, and run bash e2e test scripts for MTV/Forklift bugs and
+  features through a guided multi-step workflow (gather context, write test
+  plan, get approval, generate script, run and refine). Use when the user
+  asks to create a test, write a test script, verify a bug fix, build an e2e
+  test, generate a verification script, or mentions an MTV/Forklift Jira
+  ticket (MTV-<number>) together with testing.
 ---
 
 # MTV Verification Script Generator
@@ -10,7 +16,7 @@ Scripts follow a standard pattern: create namespace → create providers → run
 
 ## Workflow
 
-Follow these steps in order. Never skip a step. Always wait for user confirmation before proceeding.
+**Follow these steps in order. Never skip a step. Never generate the bash script before the test plan is written and approved by the user.**
 
 ---
 
@@ -122,6 +128,8 @@ The plan must include:
 ---
 
 ### Step 4 — Generate the test script
+
+**STOP — Do not proceed unless `tests/scenarios/test-mtv-<number>.md` exists and the user has explicitly approved the test plan from Step 3.**
 
 After plan approval, generate a bash script named `tests/scenarios/test-mtv-<number>.sh`.
 

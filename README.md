@@ -16,7 +16,7 @@ Just open a chat and ask. Here's one high-impact example per skill:
 | *"Create a Fedora VM with 4 GiB RAM and start it"* | **kubectl-virt** |
 | *"Is Ceph healthy? Any OSDs near full?"* | **check-ceph-health** |
 | *"Install the CLI plugins so I can use these tools"* | **mcp-setup** |
-| *"Write a verification script for MTV-4911"* | **mtv-verify-script** |
+| *"Write a verification script for MTV-4911"* | **mtv-test** |
 
 ## Quick Start
 
@@ -82,7 +82,7 @@ Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) wo
 | **kubectl-mtv** | Manage MTV/Forklift VM migrations from vSphere, oVirt, OpenStack, OVA, EC2, or HyperV |
 | **kubectl-virt** | Create, start, stop, and manage KubeVirt virtual machines |
 | **mcp-setup** | Install and configure CLI plugins (kubectl-mtv, kubectl-metrics, kubectl-debug-queries) |
-| **mtv-verify-script** | Generate and run a self-contained bash e2e verification script for an MTV/Forklift Jira ticket |
+| **mtv-test** | Generate and run bash e2e test scripts for MTV/Forklift bugs and features |
 | **observe-metrics** | Observe cluster metrics via Prometheus/Thanos (discovery, instant and range queries, PromQL) |
 | **troubleshoot-virt** | Troubleshoot stuck VMs, DataVolumes, and migrations |
 
