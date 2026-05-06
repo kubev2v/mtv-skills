@@ -1,6 +1,6 @@
 # Setting Up the MTV Agent
 
-The [mtv-agent](https://github.com/yaacov/mtv-agent) is a Python-based AI assistant
+The [mtv-agent](https://github.com/kubev2v/mtv-agent) is a Python-based AI assistant
 for MTV/Forklift VM migrations. It provides a chat interface with an LLM tool loop,
 connects to MCP servers over SSE, and includes a built-in web UI.
 

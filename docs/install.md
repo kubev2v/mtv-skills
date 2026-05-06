@@ -10,22 +10,22 @@ Install as a Claude Code plugin — no cloning or symlinks needed:
 
 ```bash
 # Add the marketplace and install the plugin
-claude plugin marketplace add yaacov/forklift-skills
-claude plugin install forklift-skills@forklift-skills
+claude plugin marketplace add kubev2v/mtv-skills
+claude plugin install mtv-skills@mtv-skills
 ```
 
-Skills appear as `/forklift-skills:<skill-name>` in Claude Code.
+Skills appear as `/mtv-skills:<skill-name>` in Claude Code.
 
 To update later:
 
 ```bash
-claude plugin marketplace update forklift-skills
+claude plugin marketplace update mtv-skills
 ```
 
 To uninstall:
 
 ```bash
-claude plugin uninstall forklift-skills@forklift-skills
+claude plugin uninstall mtv-skills@mtv-skills
 ```
 
 ## Claude Code Symlinks (alternative)
@@ -33,8 +33,8 @@ claude plugin uninstall forklift-skills@forklift-skills
 If you prefer managing skills as symlinks instead of a plugin:
 
 ```bash
-git clone https://github.com/yaacov/forklift-skills.git
-cd forklift-skills
+git clone https://github.com/kubev2v/mtv-skills.git
+cd mtv-skills
 ```
 
 **User-wide** (available in all your projects):
@@ -53,7 +53,7 @@ done
 # From inside the target project directory
 mkdir -p .claude/skills
 
-for skill in /path/to/forklift-skills/skills/*/; do
+for skill in /path/to/mtv-skills/skills/*/; do
   ln -sfn "$skill" .claude/skills/"$(basename "$skill")"
 done
 ```
@@ -61,8 +61,8 @@ done
 ## Cursor
 
 ```bash
-git clone https://github.com/yaacov/forklift-skills.git
-cd forklift-skills
+git clone https://github.com/kubev2v/mtv-skills.git
+cd mtv-skills
 ```
 
 **User-wide** (available in all your projects):
@@ -81,7 +81,7 @@ done
 # From inside the target project directory
 mkdir -p .cursor/skills
 
-for skill in /path/to/forklift-skills/skills/*/; do
+for skill in /path/to/mtv-skills/skills/*/; do
   ln -sfn "$skill" .cursor/skills/"$(basename "$skill")"
 done
 ```
@@ -131,7 +131,7 @@ your agent: *"Install the CLI plugins so I can use these tools."*
 ### Claude Code Plugin
 
 ```bash
-claude plugin uninstall forklift-skills@forklift-skills
+claude plugin uninstall mtv-skills@mtv-skills
 ```
 
 ### Claude Code Symlinks

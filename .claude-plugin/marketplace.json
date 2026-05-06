@@ -1,17 +1,17 @@
 {
-  "name": "forklift-skills",
+  "name": "mtv-skills",
   "owner": {
-    "name": "yaacov"
+    "name": "kubev2v"
   },
   "metadata": {
     "description": "AI agent skills for VM migrations and OpenShift operations"
   },
   "plugins": [
     {
-      "name": "forklift-skills",
+      "name": "mtv-skills",
       "source": {
         "source": "url",
-        "url": "https://github.com/yaacov/forklift-skills.git",
+        "url": "https://github.com/kubev2v/mtv-skills.git",
         "sha": "fcb45acd95e380a5ca0236106b01e6a18623b040"
       },
       "description": "AI agent skills for MTV/Forklift VM migrations, OpenShift health checks, KubeVirt management, Prometheus metrics, and vSphere automation"

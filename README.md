@@ -24,21 +24,21 @@ Just open a chat and ask. Here's one high-impact example per skill:
 
 ```bash
 # Add the marketplace and install the plugin
-claude plugin marketplace add yaacov/forklift-skills
-claude plugin install forklift-skills@forklift-skills
+claude plugin marketplace add kubev2v/mtv-skills
+claude plugin install mtv-skills@mtv-skills
 ```
 
 Or test locally from a cloned repo:
 
 ```bash
-claude --plugin-dir ./forklift-skills
+claude --plugin-dir ./mtv-skills
 ```
 
 ### Cursor (symlink install)
 
 ```bash
-git clone https://github.com/yaacov/forklift-skills.git
-cd forklift-skills
+git clone https://github.com/kubev2v/mtv-skills.git
+cd mtv-skills
 
 mkdir -p ~/.cursor/skills
 for skill in skills/*/; do
@@ -91,7 +91,7 @@ Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) wo
 | Path | Description |
 |------|-------------|
 | **[docs/install.md](docs/install.md)** | Full installation and removal instructions (Claude Code & Cursor) |
-| **[docs/setup-mtv-agent.md](docs/setup-mtv-agent.md)** | Setting up the [mtv-agent](https://github.com/yaacov/mtv-agent) AI assistant |
+| **[docs/setup-mtv-agent.md](docs/setup-mtv-agent.md)** | Setting up the [mtv-agent](https://github.com/kubev2v/mtv-agent) AI assistant |
 | **[docs/create-providers-cli.md](docs/create-providers-cli.md)** | Creating MTV source providers using `oc mtv` |
 | **[scripts/create-providers.sh](scripts/create-providers.sh)** | Script that creates providers from environment variables |
 
