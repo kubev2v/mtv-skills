@@ -20,6 +20,7 @@ To update later:
 
 ```bash
 claude plugin marketplace update mtv-skills
+claude plugin install mtv-skills@mtv-skills
 ```
 
 To uninstall:
@@ -139,7 +140,7 @@ claude plugin uninstall mtv-skills@mtv-skills
 **User-wide:**
 
 ```bash
-for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup observe-metrics troubleshoot-virt; do
+for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
   rm -f ~/.claude/skills/"$skill"
 done
 ```
@@ -148,7 +149,7 @@ done
 
 ```bash
 # From inside the target project directory
-for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup observe-metrics troubleshoot-virt; do
+for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
   rm -f .claude/skills/"$skill"
 done
 ```
@@ -158,7 +159,7 @@ done
 **User-wide:**
 
 ```bash
-for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup observe-metrics troubleshoot-virt; do
+for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
   rm -f ~/.cursor/skills/"$skill"
 done
 ```
@@ -167,7 +168,7 @@ done
 
 ```bash
 # From inside the target project directory
-for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup observe-metrics troubleshoot-virt; do
+for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
   rm -f .cursor/skills/"$skill"
 done
 ```
