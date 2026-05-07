@@ -259,10 +259,64 @@ oc mtv delete provider --name my-vsphere -n <namespace>
 
 ## TSL Query Syntax (for --vms and --query flags)
 
-TSL (Tree Search Language) filters VMs by their properties:
+Use `--query` to filter, sort, and project results server-side. Use pipe output to `jq`, `grep`, or other post-processing tools only when `--query` cannot express what you need.
+The `--query` flag handles filtering, field selection, sorting, and limiting natively.
+
+TSL (Tree Search Language) supports four optional clauses, in this order:
 
 ```
-where <condition> [order by <field> [asc|desc]] [limit N]
+[select <field>, ...] [where <condition>] [order by <field> [asc|desc]] [limit N]
+```
+
+All clauses are optional and can be combined freely. You can use `select` alone, `where` alone, `order by` alone, `limit` alone, or any combination.
+
+### select -- choose which fields to return
+
+Use `select` to project only the fields you need (like SQL SELECT).
+**Note:** `select` only affects table output (the default). With `--output json`, all fields are always returned regardless of `select`.
+
+```
+select name, cpuCount, memoryMB
+select name, powerState, len(disks) as diskCount
+select name, disks[*].capacity as diskSizes
+select name, status.conditions
+```
+
+### where -- filter rows
+
+```
+where name ~= 'prod-.*'
+where powerState = 'poweredOn' and memoryMB > 4096
+where cpuCount > 4 and len(disks) > 1
+where any(concerns[*].category = 'Critical')
+where name in ['vm1', 'vm2', 'vm3']
+where memoryMB between 2048 and 8192
+where not (powerState = 'poweredOff')
+```
+
+### order by -- sort results
+
+```
+order by name asc
+order by memoryMB desc
+order by cpuCount desc
+```
+
+### limit -- cap the number of results
+
+```
+limit 10
+limit 5
+```
+
+### Combining clauses
+
+```
+select name, cpuCount, memoryMB where powerState = 'poweredOn' order by memoryMB desc limit 10
+where name like '%web%' order by memoryMB desc limit 10
+select name, powerState where cpuCount > 4 order by name asc
+where memoryMB > 4096 limit 5
+select name where any(concerns[*].category = 'Critical') order by name asc limit 20
 ```
 
 ### Operators
@@ -280,16 +334,6 @@ where <condition> [order by <field> [asc|desc]] [limit N]
 - `len(disks)`, `len(nics)`, `disks[*].capacity`, `disks[*].shared`
 - `concerns[*].category` (Critical, Warning, Information)
 - `path` (folder path), `host`, `storageUsed`
-
-### Examples
-
-```
-where name ~= 'prod-.*'
-where powerState = 'poweredOn' and memoryMB > 4096
-where cpuCount > 4 and len(disks) > 1
-where any(concerns[*].category = 'Critical')
-where name like '%web%' order by memoryMB desc limit 10
-```
 
 ## Other Resources
 
