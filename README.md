@@ -28,6 +28,13 @@ claude plugin marketplace add kubev2v/mtv-skills
 claude plugin install mtv-skills@mtv-skills
 ```
 
+To update later:
+
+```bash
+claude plugin marketplace update mtv-skills
+claude plugin install mtv-skills@mtv-skills
+```
+
 Or test locally from a cloned repo:
 
 ```bash
