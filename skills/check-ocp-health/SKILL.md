@@ -20,6 +20,26 @@ curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/in
 curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
 ```
 
+## Using `--query` for Filtering
+
+Use `--query` to filter, sort, and project results server-side. Use pipe output to `jq`, `grep`, or other post-processing tools only when `--query` cannot express what you need.
+
+The `--query` flag accepts TSL (Tree Search Language) with four optional clauses:
+
+```
+[select <field>, ...] [where <condition>] [order by <field> [asc|desc]] [limit N]
+```
+
+**Note:** `select` only affects table output (the default). With `--output json`, all fields are always returned regardless of `select`.
+
+Operators: `=`, `!=`, `<`, `>`, `<=`, `>=`, `like` (% wildcard), `ilike` (case-insensitive), `~=` (regex), `and`, `or`, `not`, `in [...]`, `between X and Y`.
+
+Before writing queries, discover actual field names with `--output json`:
+
+```bash
+oc debug-queries list --resource pods --namespace <namespace> --limit 2 --output json
+```
+
 ## Quick Triage
 
 Check these in order for a fast overview:
