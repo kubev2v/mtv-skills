@@ -97,6 +97,7 @@ Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) us
 
 | Path | Description |
 |------|-------------|
+| **[docs/skills.md](docs/skills.md)** | Quick reference for every skill (what / when / trigger) |
 | **[docs/install.md](docs/install.md)** | Full installation and removal instructions (Claude Code & Cursor) |
 | **[docs/setup-mtv-agent.md](docs/setup-mtv-agent.md)** | Setting up the [mtv-agent](https://github.com/kubev2v/mtv-agent) AI assistant |
 | **[docs/create-providers-cli.md](docs/create-providers-cli.md)** | Creating MTV source providers using `oc mtv` |
