@@ -82,7 +82,7 @@ curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/in
 | [kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries) | `oc debug-queries` |
 | [kubectl-metrics](https://github.com/yaacov/kubectl-metrics) | `oc metrics` |
 
-Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) use their own CLIs (`govc` and `oc virt`/virtctl). The **mtv-test** skill also uses the [Atlassian Rovo MCP](https://www.atlassian.com/rovo/mcp) for Jira ticket fetching and `gh` for GitHub PR details.
+Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) use their own CLIs (`govc` and `oc virt`/virtctl). The **mtv-test** skill also uses the [Atlassian Rovo MCP](https://support.atlassian.com/rovo/docs/getting-started-with-the-atlassian-remote-mcp-server/) for Jira ticket fetching and `gh` for GitHub PR details.
 
 ## Included Skills
 

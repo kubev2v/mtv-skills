@@ -46,7 +46,7 @@ If the MCP server `user-Atlassian-Rovo-MCP` is not available, ask the user to in
 3. After adding the server, authenticate when prompted (the MCP handles OAuth with Atlassian Cloud).
 4. Restart the agent session so the new MCP tools become available.
 
-For more information: https://www.atlassian.com/rovo/mcp
+For more information: https://support.atlassian.com/rovo/docs/getting-started-with-the-atlassian-remote-mcp-server/
 
 ## Fallback
 
