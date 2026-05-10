@@ -16,14 +16,32 @@ set -euo pipefail
 KUBECTL="${KUBECTL:-oc}"
 MTV="${KUBECTL} mtv"
 
-fetch_ca_cert() {
-  local hostport
+fetch_ca_cert_tls() {
+  local hostport host
   hostport=$(echo "$1" | sed -E 's|https?://||; s|/.*||')
+  host="${hostport%%:*}"
   if ! echo "${hostport}" | grep -q ':'; then
     hostport="${hostport}:443"
   fi
-  openssl s_client -showcerts -connect "${hostport}" </dev/null 2>/dev/null \
+  openssl s_client -showcerts -servername "${host}" \
+    -connect "${hostport}" </dev/null 2>/dev/null \
     | awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/'
+}
+
+fetch_ca_cert_ovirt() {
+  local host cert_url cert
+  host=$(echo "$1" | sed -E 's|https?://||; s|[:/].*||')
+  cert_url="https://${host}/ovirt-engine/services/pki-resource?resource=ca-certificate&format=X509-PEM-CA"
+  cert=$(curl -sSk "${cert_url}") || {
+    echo "ERROR: Failed to fetch CA certificate from ${cert_url}" >&2
+    return 1
+  }
+  if ! echo "${cert}" | grep -q -- "-----BEGIN CERTIFICATE-----" ||
+     ! echo "${cert}" | grep -q -- "-----END CERTIFICATE-----"; then
+    echo "ERROR: Response from ${cert_url} is not valid PEM" >&2
+    return 1
+  fi
+  echo "${cert}"
 }
 
 created=0
@@ -37,7 +55,7 @@ if [[ -n "${GOVC_URL:-}" && -n "${GOVC_USERNAME:-}" && -n "${GOVC_PASSWORD:-}" ]
     --url "${GOVC_URL}/sdk" \
     --username "${GOVC_USERNAME}" \
     --password "${GOVC_PASSWORD}" \
-    --cacert "$(fetch_ca_cert "${GOVC_URL}")"
+    --cacert "$(fetch_ca_cert_tls "${GOVC_URL}")"
   echo "vSphere provider created."
   created=$((created + 1))
 fi
@@ -51,7 +69,7 @@ if [[ -n "${RHV_URL:-}" && -n "${RHV_USERNAME:-}" && -n "${RHV_PASSWORD:-}" ]]; 
     --url "${RHV_URL}" \
     --username "${RHV_USERNAME}" \
     --password "${RHV_PASSWORD}" \
-    --cacert "$(fetch_ca_cert "${RHV_URL}")"
+    --cacert "$(fetch_ca_cert_ovirt "${RHV_URL}")"
   echo "oVirt/RHV provider created."
   created=$((created + 1))
 fi
@@ -68,7 +86,7 @@ if [[ -n "${OSP_URL:-}" && -n "${OSP_USERNAME:-}" && -n "${OSP_PASSWORD:-}" ]]; 
     --provider-domain-name "${OSP_DOMAIN_NAME:-Default}" \
     --provider-project-name "${OSP_PROJECT_NAME:-admin}" \
     --provider-region-name "${OSP_REGION_NAME:-regionOne}" \
-    --cacert "$(fetch_ca_cert "${OSP_URL}")"
+    --cacert "$(fetch_ca_cert_tls "${OSP_URL}")"
   echo "OpenStack provider created."
   created=$((created + 1))
 fi
