@@ -11,7 +11,7 @@ Install as a Claude Code plugin — no cloning or symlinks needed:
 ```bash
 # Add the marketplace and install the plugin
 claude plugin marketplace add kubev2v/mtv-skills
-claude plugin install mtv-skills@mtv-skills
+claude plugin install kubev2v@mtv-skills
 ```
 
 Skills appear as `/mtv-skills:<skill-name>` in Claude Code.
@@ -19,14 +19,14 @@ Skills appear as `/mtv-skills:<skill-name>` in Claude Code.
 To update later:
 
 ```bash
-claude plugin marketplace update mtv-skills
-claude plugin install mtv-skills@mtv-skills
+claude plugin marketplace update kubev2v
+claude plugin install kubev2v@mtv-skills
 ```
 
 To uninstall:
 
 ```bash
-claude plugin uninstall mtv-skills@mtv-skills
+claude plugin uninstall kubev2v@mtv-skills
 ```
 
 ## Claude Code Symlinks (alternative)
@@ -132,7 +132,7 @@ your agent: *"Install the CLI plugins so I can use these tools."*
 ### Claude Code Plugin
 
 ```bash
-claude plugin uninstall mtv-skills@mtv-skills
+claude plugin uninstall kubev2v@mtv-skills
 ```
 
 ### Claude Code Symlinks

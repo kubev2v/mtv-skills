@@ -25,14 +25,14 @@ Just open a chat and ask. Here's one high-impact example per skill:
 ```bash
 # Add the marketplace and install the plugin
 claude plugin marketplace add kubev2v/mtv-skills
-claude plugin install mtv-skills@mtv-skills
+claude plugin install kubev2v@mtv-skills
 ```
 
 To update later:
 
 ```bash
-claude plugin marketplace update mtv-skills
-claude plugin install mtv-skills@mtv-skills
+claude plugin marketplace update kubev2v
+claude plugin install kubev2v@mtv-skills
 ```
 
 Or test locally from a cloned repo:
@@ -77,21 +77,21 @@ curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/in
 | [kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries) | `oc debug-queries` |
 | [kubectl-metrics](https://github.com/yaacov/kubectl-metrics) | `oc metrics` |
 
-Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) work without any prerequisites.
+Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) use their own CLIs (`govc` and `oc virt`/virtctl). The **mtv-test** skill also uses the [Atlassian Rovo MCP](https://www.atlassian.com/rovo/mcp) for Jira ticket fetching and `gh` for GitHub PR details.
 
 ## Included Skills
 
-| Skill | Description |
-|-------|-------------|
-| **check-ceph-health** | Check Ceph storage health on OpenShift OCS/ODF clusters |
-| **check-ocp-health** | General OpenShift (OCP) cluster health check |
-| **govc-vsphere** | Manage VMware vSphere VMs using the govc CLI |
-| **kubectl-mtv** | Manage MTV/Forklift VM migrations from vSphere, oVirt, OpenStack, OVA, EC2, or HyperV |
-| **kubectl-virt** | Create, start, stop, and manage KubeVirt virtual machines |
-| **mcp-setup** | Install and configure CLI plugins (kubectl-mtv, kubectl-metrics, kubectl-debug-queries) |
-| **mtv-test** | Generate and run bash e2e test scripts for MTV/Forklift bugs and features |
-| **observe-metrics** | Observe cluster metrics via Prometheus/Thanos (discovery, instant and range queries, PromQL) |
-| **troubleshoot-virt** | Troubleshoot stuck VMs, DataVolumes, and migrations |
+| Skill | Description | Dependencies |
+|-------|-------------|--------------|
+| **check-ceph-health** | Check Ceph storage health on OpenShift OCS/ODF clusters | `oc metrics`, `oc debug-queries` |
+| **check-ocp-health** | General OpenShift (OCP) cluster health check | `oc debug-queries`, `oc metrics` |
+| **govc-vsphere** | Manage VMware vSphere VMs using the govc CLI | `govc` |
+| **kubectl-mtv** | Manage MTV/Forklift VM migrations from vSphere, oVirt, OpenStack, OVA, EC2, or HyperV | `oc mtv`, `oc debug-queries` |
+| **kubectl-virt** | Create, start, stop, and manage KubeVirt virtual machines | `oc virt` (virtctl) |
+| **mcp-setup** | Install and configure CLI plugins (kubectl-mtv, kubectl-metrics, kubectl-debug-queries) | *(none)* |
+| **mtv-test** | Generate bash e2e verification scripts for MTV/Forklift bugs and features | `oc mtv`, [Atlassian Rovo MCP](https://www.atlassian.com/rovo/mcp) (Jira), `gh` (GitHub PRs) |
+| **observe-metrics** | Observe cluster metrics via Prometheus/Thanos (discovery, instant and range queries, PromQL) | `oc metrics` |
+| **troubleshoot-virt** | Troubleshoot stuck VMs, DataVolumes, and migrations | `oc debug-queries`, `oc mtv`, `oc metrics` |
 
 ## Docs
 
@@ -100,7 +100,7 @@ Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) wo
 | **[docs/install.md](docs/install.md)** | Full installation and removal instructions (Claude Code & Cursor) |
 | **[docs/setup-mtv-agent.md](docs/setup-mtv-agent.md)** | Setting up the [mtv-agent](https://github.com/kubev2v/mtv-agent) AI assistant |
 | **[docs/create-providers-cli.md](docs/create-providers-cli.md)** | Creating MTV source providers using `oc mtv` |
-| **[scripts/create-providers.sh](scripts/create-providers.sh)** | Script that creates providers from environment variables |
+| **[examples/mtv-test/create-providers.sh](examples/mtv-test/create-providers.sh)** | Script that creates providers from environment variables |
 
 ## License
 

@@ -1,12 +1,12 @@
 ---
 name: mtv-test
 description: >-
-  Generate, review, and run bash e2e test scripts for MTV/Forklift bugs and
-  features through a guided multi-step workflow (gather context, write test
-  plan, get approval, generate script, run and refine). Use when the user
-  asks to create a test, write a test script, verify a bug fix, build an e2e
-  test, generate a verification script, or mentions an MTV/Forklift Jira
-  ticket (MTV-<number>) together with testing.
+  Generate bash e2e verification scripts for MTV/Forklift bugs and features
+  through a guided workflow (gather context, write test plan, get approval,
+  generate script). Use when the user asks to create a test, write a test
+  script, verify a bug fix, build an e2e test, generate a verification
+  script, or mentions an MTV/Forklift Jira ticket (MTV-<number>) together
+  with testing.
 ---
 
 # MTV Verification Script Generator
@@ -87,11 +87,15 @@ cluster, not the local cluster the script runs on.
 
 ### Step 3 — Create and review the test plan
 
-Write a test plan markdown file named `tests/scenarios/test-mtv-<number>.md` (relative to
-the repo root). Create the `tests/scenarios/` directory if it does not exist.
+The default test directory is `tests/scenarios/` (relative to the repo root). If the
+environment variable `MTV_TESTS_DIR` is set and non-empty, use its value instead.
+Create the directory if it does not exist.
+
+Write a test plan markdown file named `<test-dir>/test-mtv-<number>.md`.
 
 **Note:** `tests/scenarios/` is gitignored — scripts and docs are private per developer
-and are not committed to the repository.
+and are not committed to the repository. If you use a custom `MTV_TESTS_DIR`, ensure
+it is also excluded from version control.
 
 The plan must include:
 
@@ -129,9 +133,9 @@ The plan must include:
 
 ### Step 4 — Generate the test script
 
-**STOP — Do not proceed unless `tests/scenarios/test-mtv-<number>.md` exists and the user has explicitly approved the test plan from Step 3.**
+**STOP — Do not proceed unless `<test-dir>/test-mtv-<number>.md` exists and the user has explicitly approved the test plan from Step 3.**
 
-After plan approval, generate a bash script named `tests/scenarios/test-mtv-<number>.sh`.
+After plan approval, generate a bash script named `<test-dir>/test-mtv-<number>.sh`.
 
 > Full script template with preflight, cleanup, and step structure: [ref-script-template.md](ref-script-template.md)
 
@@ -193,7 +197,7 @@ provider), **share a single namespace and set of providers** across all scenario
 After the user grants permission, run the script:
 
 ```bash
-bash tests/scenarios/test-mtv-<number>.sh 2>&1 | tee tests/scenarios/test-mtv-<number>.log
+bash <test-dir>/test-mtv-<number>.sh 2>&1 | tee <test-dir>/test-mtv-<number>.log
 ```
 
 After each run:
