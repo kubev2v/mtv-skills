@@ -10,9 +10,8 @@
     {
       "name": "mtv-skills",
       "source": {
-        "source": "url",
-        "url": "https://github.com/kubev2v/mtv-skills.git",
-        "sha": "fcb45acd95e380a5ca0236106b01e6a18623b040"
+        "source": "github",
+        "repo": "kubev2v/mtv-skills"
       },
       "description": "AI agent skills for MTV/Forklift VM migrations, OpenShift health checks, KubeVirt management, Prometheus metrics, and vSphere automation"
     }
