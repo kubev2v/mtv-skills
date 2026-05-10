@@ -44,13 +44,18 @@ claude --plugin-dir ./mtv-skills
 ### Cursor (symlink install)
 
 ```bash
-git clone https://github.com/kubev2v/mtv-skills.git
-cd mtv-skills
+git clone https://github.com/kubev2v/mtv-skills.git ~/.local/share/mtv-skills
 
 mkdir -p ~/.cursor/skills
-for skill in skills/*/; do
-  ln -sfn "$(pwd)/$skill" ~/.cursor/skills/"$(basename "$skill")"
+for skill in ~/.local/share/mtv-skills/skills/*/; do
+  ln -sfn "$skill" ~/.cursor/skills/"$(basename "$skill")"
 done
+```
+
+To update later:
+
+```bash
+git -C ~/.local/share/mtv-skills pull
 ```
 
 For Claude Code per-project installs, Cursor per-project installs, and removal see [docs/install.md](docs/install.md).
@@ -81,30 +86,7 @@ Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) us
 
 ## Included Skills
 
-| Skill | Description | Dependencies |
-|-------|-------------|--------------|
-| **check-ceph-health** | Check Ceph storage health on OpenShift OCS/ODF clusters | `oc metrics`, `oc debug-queries` |
-| **check-ocp-health** | General OpenShift (OCP) cluster health check | `oc debug-queries`, `oc metrics` |
-| **govc-vsphere** | Manage VMware vSphere VMs using the govc CLI | `govc` |
-| **kubectl-mtv** | Manage MTV/Forklift VM migrations from vSphere, oVirt, OpenStack, OVA, EC2, or HyperV | `oc mtv`, `oc debug-queries` |
-| **kubectl-virt** | Create, start, stop, and manage KubeVirt virtual machines | `oc virt` (virtctl) |
-| **mcp-setup** | Install and configure CLI plugins (kubectl-mtv, kubectl-metrics, kubectl-debug-queries) | *(none)* |
-| **mtv-test** | Generate bash e2e verification scripts for MTV/Forklift bugs and features | `oc mtv`, [Atlassian Rovo MCP](https://www.atlassian.com/rovo/mcp) (Jira), `gh` (GitHub PRs) |
-| **observe-metrics** | Observe cluster metrics via Prometheus/Thanos (discovery, instant and range queries, PromQL) | `oc metrics` |
-| **troubleshoot-virt** | Troubleshoot stuck VMs, DataVolumes, and migrations | `oc debug-queries`, `oc mtv`, `oc metrics` |
-
-## Updating the Plugin
-
-The marketplace tracks the default branch with no pinned SHA or version, so
-every pushed commit is automatically a new version. Users just run:
-
-```bash
-claude plugin marketplace update kubev2v
-claude plugin install mtv-skills@kubev2v
-```
-
-No manual SHA bump or release step is required from maintainers — push to
-`main` and users get the latest on their next update.
+See [docs/skills.md](docs/skills.md) for a full list of skills with descriptions, triggers, and dependencies.
 
 ## Docs
 

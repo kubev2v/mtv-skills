@@ -35,8 +35,7 @@ claude plugin uninstall mtv-skills@kubev2v
 If you prefer managing skills as symlinks instead of a plugin:
 
 ```bash
-git clone https://github.com/kubev2v/mtv-skills.git
-cd mtv-skills
+git clone https://github.com/kubev2v/mtv-skills.git ~/.local/share/mtv-skills
 ```
 
 **User-wide** (available in all your projects):
@@ -44,8 +43,8 @@ cd mtv-skills
 ```bash
 mkdir -p ~/.claude/skills
 
-for skill in skills/*/; do
-  ln -sfn "$(pwd)/$skill" ~/.claude/skills/"$(basename "$skill")"
+for skill in ~/.local/share/mtv-skills/skills/*/; do
+  ln -sfn "$skill" ~/.claude/skills/"$(basename "$skill")"
 done
 ```
 
@@ -55,7 +54,7 @@ done
 # From inside the target project directory
 mkdir -p .claude/skills
 
-for skill in /path/to/mtv-skills/skills/*/; do
+for skill in ~/.local/share/mtv-skills/skills/*/; do
   ln -sfn "$skill" .claude/skills/"$(basename "$skill")"
 done
 ```
@@ -63,8 +62,7 @@ done
 ## Cursor
 
 ```bash
-git clone https://github.com/kubev2v/mtv-skills.git
-cd mtv-skills
+git clone https://github.com/kubev2v/mtv-skills.git ~/.local/share/mtv-skills
 ```
 
 **User-wide** (available in all your projects):
@@ -72,8 +70,8 @@ cd mtv-skills
 ```bash
 mkdir -p ~/.cursor/skills
 
-for skill in skills/*/; do
-  ln -sfn "$(pwd)/$skill" ~/.cursor/skills/"$(basename "$skill")"
+for skill in ~/.local/share/mtv-skills/skills/*/; do
+  ln -sfn "$skill" ~/.cursor/skills/"$(basename "$skill")"
 done
 ```
 
@@ -83,12 +81,16 @@ done
 # From inside the target project directory
 mkdir -p .cursor/skills
 
-for skill in /path/to/mtv-skills/skills/*/; do
+for skill in ~/.local/share/mtv-skills/skills/*/; do
   ln -sfn "$skill" .cursor/skills/"$(basename "$skill")"
 done
 ```
 
-> **Tip:** Symlinks keep skills up to date — just `git pull` inside the cloned repo to get the latest changes.
+To update:
+
+```bash
+git -C ~/.local/share/mtv-skills pull
+```
 
 ## CLI Plugin Prerequisites
 
@@ -172,4 +174,10 @@ done
 for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
   rm -f .cursor/skills/"$skill"
 done
+```
+
+### Cloned Repository
+
+```bash
+rm -rf ~/.local/share/mtv-skills
 ```
