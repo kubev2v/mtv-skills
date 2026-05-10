@@ -25,14 +25,14 @@ Just open a chat and ask. Here's one high-impact example per skill:
 ```bash
 # Add the marketplace and install the plugin
 claude plugin marketplace add kubev2v/mtv-skills
-claude plugin install kubev2v@mtv-skills
+claude plugin install mtv-skills@kubev2v
 ```
 
 To update later:
 
 ```bash
 claude plugin marketplace update kubev2v
-claude plugin install kubev2v@mtv-skills
+claude plugin install mtv-skills@kubev2v
 ```
 
 Or test locally from a cloned repo:
@@ -92,6 +92,19 @@ Skills that do not require these plugins (**govc-vsphere**, **kubectl-virt**) us
 | **mtv-test** | Generate bash e2e verification scripts for MTV/Forklift bugs and features | `oc mtv`, [Atlassian Rovo MCP](https://www.atlassian.com/rovo/mcp) (Jira), `gh` (GitHub PRs) |
 | **observe-metrics** | Observe cluster metrics via Prometheus/Thanos (discovery, instant and range queries, PromQL) | `oc metrics` |
 | **troubleshoot-virt** | Troubleshoot stuck VMs, DataVolumes, and migrations | `oc debug-queries`, `oc mtv`, `oc metrics` |
+
+## Updating the Plugin
+
+The marketplace tracks the default branch with no pinned SHA or version, so
+every pushed commit is automatically a new version. Users just run:
+
+```bash
+claude plugin marketplace update kubev2v
+claude plugin install mtv-skills@kubev2v
+```
+
+No manual SHA bump or release step is required from maintainers — push to
+`main` and users get the latest on their next update.
 
 ## Docs
 
