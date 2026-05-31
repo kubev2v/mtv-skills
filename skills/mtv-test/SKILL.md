@@ -16,6 +16,73 @@ Scripts follow a standard pattern: create namespace → create providers → run
 
 ## Workflow
 
+**Before starting, review existing examples for patterns and best practices:**
+- Local: look for existing `test-mtv-*.sh` scripts in the test directory (`tests/scenarios/` or `MTV_TESTS_DIR`)
+- Remote: https://github.com/kubev2v/mtv-skills/tree/main/examples/mtv-test
+- Provider creation: see `examples/mtv-test/create-providers.sh` in the skill repository for CA cert fetching, skip-TLS, and per-type patterns
+
+Use these as reference for structure, logging style, cleanup patterns, and provider creation.
+
+---
+
+### Mode: Headless vs Interactive
+
+**Headless mode** -- Triggered when the user includes `--headless` in their message,
+or when the phrasing implies immediate output without interaction (e.g., "generate test
+for MTV-1234", "create test script for MTV-1234"):
+- Skip all interactive prompts (Steps 1c, 2, 3 approval gate, 4 approval gate, 5)
+- Fetch the ticket, evaluate if it has enough info, and either generate both files
+  or report what's missing
+- Use defaults from the table below for any information not found in the ticket
+- Do NOT run the script automatically
+
+**Interactive mode** -- The default when `--headless` is not specified and the user
+uses collaborative phrasing (e.g., "help me write a test for MTV-1234", "let's create
+a verification script"):
+- Follow Steps 1-5 as documented below
+
+---
+
+### Headless Flow
+
+When running in headless mode, execute these steps without prompting:
+
+1. **Fetch the Jira ticket** using the instructions in [ref-jira.md](ref-jira.md).
+2. **Evaluate sufficiency** -- the ticket must contain at minimum:
+   - A clear description of what to test (bug fix, feature, regression)
+   - Provider type (explicitly stated or inferable from context)
+   - Steps to reproduce or acceptance criteria
+3. **If insufficient** -- report what is missing and stop. Do NOT prompt interactively.
+   Output format:
+   ```
+   Cannot generate test script for MTV-XXXX:
+   - <field>: <why it is missing or ambiguous>
+   - ...
+
+   Provide this information or use interactive mode for guided test creation.
+   ```
+4. **If sufficient** -- generate both files directly into the test directory
+   (`tests/scenarios/` or `MTV_TESTS_DIR`):
+   - `<test-dir>/test-mtv-<number>.md` (test plan)
+   - `<test-dir>/test-mtv-<number>.sh` (test script)
+5. **Report result** -- show the user what was generated and where the files are.
+
+#### Headless Defaults
+
+| Field | Default |
+|-------|---------|
+| Namespace | `mtv-<number>-test` |
+| Provider name | `<type>-test` |
+| Plan name | `mtv-<number>-plan` |
+| TLS mode | `--provider-insecure-skip-tls` |
+| VM name | `${VM:-my-test-vm}` |
+| SKIP_CLEANUP | `${SKIP_CLEANUP:-false}` |
+| Credentials | Environment variable references (never hardcoded) |
+
+---
+
+## Interactive Mode
+
 **Follow these steps in order. Never skip a step. Never generate the bash script before the test plan is written and approved by the user.**
 
 ---

@@ -1,20 +1,23 @@
 #!/bin/bash
 
 # Create MTV source providers from environment variables.
+#
 # Usage: ./create-providers.sh
 #
 # Set the environment variables for the providers you want to create.
 # Only providers whose required variables are set will be created.
 #
+# Common:
+#   INSECURE_SKIP_TLS=true   -- skip TLS verification instead of fetching CA certs
+#
 # vSphere:   GOVC_URL, GOVC_USERNAME, GOVC_PASSWORD
 # oVirt/RHV: RHV_URL, RHV_USERNAME, RHV_PASSWORD
-# OpenStack: OSP_URL, OSP_USERNAME, OSP_PASSWORD, OSP_DOMAIN, OSP_PROJECT
+# OpenStack: OSP_URL, OSP_USERNAME, OSP_PASSWORD, OSP_DOMAIN_NAME, OSP_PROJECT_NAME, OSP_REGION_NAME
 # OVA:       OVA_URL
 
 set -euo pipefail
 
-KUBECTL="${KUBECTL:-oc}"
-MTV="${KUBECTL} mtv"
+INSECURE_SKIP_TLS="${INSECURE_SKIP_TLS:-false}"
 
 fetch_ca_cert_tls() {
   local hostport host
@@ -49,13 +52,23 @@ created=0
 # --- vSphere ---
 if [[ -n "${GOVC_URL:-}" && -n "${GOVC_USERNAME:-}" && -n "${GOVC_PASSWORD:-}" ]]; then
   echo "Creating vSphere provider..."
-  ${MTV} create provider \
-    --name vsphere-provider \
-    --type vsphere \
-    --url "${GOVC_URL}/sdk" \
-    --username "${GOVC_USERNAME}" \
-    --password "${GOVC_PASSWORD}" \
-    --cacert "$(fetch_ca_cert_tls "${GOVC_URL}")"
+  if [[ "${INSECURE_SKIP_TLS}" == "true" ]]; then
+    oc mtv create provider \
+      --name vsphere-provider \
+      --type vsphere \
+      --url "https://${GOVC_URL}/sdk" \
+      --username "${GOVC_USERNAME}" \
+      --password "${GOVC_PASSWORD}" \
+      --provider-insecure-skip-tls
+  else
+    oc mtv create provider \
+      --name vsphere-provider \
+      --type vsphere \
+      --url "https://${GOVC_URL}/sdk" \
+      --username "${GOVC_USERNAME}" \
+      --password "${GOVC_PASSWORD}" \
+      --cacert "$(fetch_ca_cert_tls "${GOVC_URL}")"
+  fi
   echo "vSphere provider created."
   created=$((created + 1))
 fi
@@ -63,13 +76,23 @@ fi
 # --- oVirt / RHV ---
 if [[ -n "${RHV_URL:-}" && -n "${RHV_USERNAME:-}" && -n "${RHV_PASSWORD:-}" ]]; then
   echo "Creating oVirt/RHV provider..."
-  ${MTV} create provider \
-    --name ovirt-provider \
-    --type ovirt \
-    --url "${RHV_URL}" \
-    --username "${RHV_USERNAME}" \
-    --password "${RHV_PASSWORD}" \
-    --cacert "$(fetch_ca_cert_ovirt "${RHV_URL}")"
+  if [[ "${INSECURE_SKIP_TLS}" == "true" ]]; then
+    oc mtv create provider \
+      --name ovirt-provider \
+      --type ovirt \
+      --url "${RHV_URL}" \
+      --username "${RHV_USERNAME}" \
+      --password "${RHV_PASSWORD}" \
+      --provider-insecure-skip-tls
+  else
+    oc mtv create provider \
+      --name ovirt-provider \
+      --type ovirt \
+      --url "${RHV_URL}" \
+      --username "${RHV_USERNAME}" \
+      --password "${RHV_PASSWORD}" \
+      --cacert "$(fetch_ca_cert_ovirt "${RHV_URL}")"
+  fi
   echo "oVirt/RHV provider created."
   created=$((created + 1))
 fi
@@ -77,16 +100,29 @@ fi
 # --- OpenStack ---
 if [[ -n "${OSP_URL:-}" && -n "${OSP_USERNAME:-}" && -n "${OSP_PASSWORD:-}" ]]; then
   echo "Creating OpenStack provider..."
-  ${MTV} create provider \
-    --name openstack-provider \
-    --type openstack \
-    --url "${OSP_URL}" \
-    --username "${OSP_USERNAME}" \
-    --password "${OSP_PASSWORD}" \
-    --provider-domain-name "${OSP_DOMAIN_NAME:-Default}" \
-    --provider-project-name "${OSP_PROJECT_NAME:-admin}" \
-    --provider-region-name "${OSP_REGION_NAME:-regionOne}" \
-    --cacert "$(fetch_ca_cert_tls "${OSP_URL}")"
+  if [[ "${INSECURE_SKIP_TLS}" == "true" ]]; then
+    oc mtv create provider \
+      --name openstack-provider \
+      --type openstack \
+      --url "${OSP_URL}" \
+      --username "${OSP_USERNAME}" \
+      --password "${OSP_PASSWORD}" \
+      --provider-domain-name "${OSP_DOMAIN_NAME:-Default}" \
+      --provider-project-name "${OSP_PROJECT_NAME:-admin}" \
+      --provider-region-name "${OSP_REGION_NAME:-regionOne}" \
+      --provider-insecure-skip-tls
+  else
+    oc mtv create provider \
+      --name openstack-provider \
+      --type openstack \
+      --url "${OSP_URL}" \
+      --username "${OSP_USERNAME}" \
+      --password "${OSP_PASSWORD}" \
+      --provider-domain-name "${OSP_DOMAIN_NAME:-Default}" \
+      --provider-project-name "${OSP_PROJECT_NAME:-admin}" \
+      --provider-region-name "${OSP_REGION_NAME:-regionOne}" \
+      --cacert "$(fetch_ca_cert_tls "${OSP_URL}")"
+  fi
   echo "OpenStack provider created."
   created=$((created + 1))
 fi
@@ -94,7 +130,7 @@ fi
 # --- OVA ---
 if [[ -n "${OVA_URL:-}" ]]; then
   echo "Creating OVA provider..."
-  ${MTV} create provider \
+  oc mtv create provider \
     --name ova-provider \
     --type ova \
     --url "${OVA_URL}"

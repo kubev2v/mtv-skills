@@ -7,7 +7,7 @@ Pick the block that matches the provider type for the scenario.
 
 ```bash
 oc mtv create provider --name "${PROVIDER}" --type vsphere \
-  --url "${GOVC_URL}/sdk" \
+  --url "https://${GOVC_URL}/sdk" \
   --username "${GOVC_USERNAME}" \
   --password "${GOVC_PASSWORD}" \
   --provider-insecure-skip-tls \
@@ -18,7 +18,7 @@ oc mtv create provider --name "${PROVIDER}" --type vsphere \
 
 ```bash
 oc mtv create provider --name "${PROVIDER}" --type vsphere \
-  --url "${GOVC_URL}/sdk" \
+  --url "https://${GOVC_URL}/sdk" \
   --username "${GOVC_USERNAME}" \
   --password "${GOVC_PASSWORD}" \
   --cacert "$(fetch_ca_cert "${GOVC_URL}")" \
