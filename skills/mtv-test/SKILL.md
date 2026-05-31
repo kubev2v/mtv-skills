@@ -247,18 +247,14 @@ target storage class. When you do need to override, use explicit `--storage-pair
 - Add a clear `echo "TEST PASSED/FAILED/INCONCLUSIVE: <reason>"` before each exit
 - **Continue on failure**: When a script has multiple scenarios, use the multi-scenario
   subshell pattern from [ref-helpers.md](ref-helpers.md) to record failures and continue.
+- Use `==========================================` (42 chars) separators with step headers
 - Use numbered `STEP N:` echo banners so logs are easy to follow
 - Variables that users commonly override go at the top as constants with defaults
 - Support `SKIP_CLEANUP=true` to skip cleanup and preserve all resources for forensic inspection
-- Include a preflight section that verifies MTV is installed and checks VDDK image is configured
-- **Be verbose**: echo key `oc` commands before executing them, prefixed with `>>>`, so users
-  can follow along, reproduce steps manually, and debug failures. Key commands to echo:
-  - Provider creation (`oc mtv create provider ...`)
-  - Inventory queries (`oc mtv get inventory storage ...`)
-  - Plan creation (`oc mtv create plan ...`) — show the full command with all flags
-  - Plan start (`oc mtv start plan ...`)
-  - PVC listing (`oc get pvc -n ...`) — show the full table output, not just names
-  - Mask secrets/tokens in echoed commands (use `${VAR_NAME}` instead of the value)
+- Include a preflight section that verifies MTV is installed; for vSphere providers, also check that the VDDK image is configured (skip the VDDK check for other provider types)
+- Use simple progress messages before each command (e.g., "Creating provider...", "Waiting for plan...")
+- Do NOT use `>>>` prefix or echo full commands — let the actual command output speak for itself
+- Keep logging minimal and focused on what's happening, not how it's being done
 
 #### Reusing namespace and providers across scenarios
 
