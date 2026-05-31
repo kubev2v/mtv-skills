@@ -123,7 +123,22 @@ Summarize what you learned from all available sources before proceeding to Step 
 
 ### Step 2 — Gather environment information
 
-Ask the user for any information not found in the ticket. Collect only what is needed, no need to get specific string data an enviornment variable name is good too:
+**If the test needs to explore provider inventory** (e.g., to discover available networks, VMs, storage, or other resources), create a temporary namespace and providers first to query the inventory:
+
+1. Create a temporary namespace (e.g., `mtv-<number>-temp`)
+2. Create temporary providers (source and destination)
+3. Wait for providers to be Ready
+4. Query inventory using `oc mtv get inventory` (network, vm, storage, etc.)
+5. Collect the needed information (e.g., available network names, VM names)
+6. Delete the temporary namespace
+7. Proceed with the regular test plan using the gathered information
+
+**Alternative exploration methods:**
+- For vSphere: use `govc` commands directly (e.g., `govc ls`, `govc vm.info`, `govc network.info`)
+- For AWS/EC2: use AWS CLI (e.g., `aws ec2 describe-instances`, `aws ec2 describe-vpcs`)
+- For other providers: use their native CLI tools as appropriate
+
+After exploration (if needed), ask the user for any information not found in the ticket. Collect only what is needed, no need to get specific string data — an environment variable name is good too:
 
 | Information | When needed |
 |---|---|
@@ -135,6 +150,8 @@ Ask the user for any information not found in the ticket. Collect only what is n
 | Any custom image or setting to override | When the ticket references a fix image |
 
 **Do not ask for information that has a clear default** (e.g. namespace name, plan name, provider name — these can be derived from the ticket number).
+
+**Do not check for environment variables in the script** — just use them directly (e.g., `${GOVC_URL}`). Let bash fail naturally if they are unset.
 
 Inform the user which environment variables they should set:
 - vSphere: `GOVC_URL`, `GOVC_USERNAME`, `GOVC_PASSWORD`
