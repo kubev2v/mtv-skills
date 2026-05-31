@@ -31,8 +31,7 @@ claude plugin install mtv-skills@kubev2v
 To update later:
 
 ```bash
-claude plugin marketplace update kubev2v
-claude plugin install mtv-skills@kubev2v
+claude plugin update mtv-skills@kubev2v
 ```
 
 Or test locally from a cloned repo:
