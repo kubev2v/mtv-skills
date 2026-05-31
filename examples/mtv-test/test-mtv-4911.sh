@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Test: MTV-4911 — BlockerGracePeriod
+# Test: MTV-4911 - BlockerGracePeriod
 #
 # Verifies that a migration survives a transient provider outage within
 # the 5-minute grace window and completes successfully after the provider
@@ -43,19 +43,25 @@ POLL=15
 # --- Cleanup ---
 cleanup() {
   if [[ "${SKIP_CLEANUP}" == "true" ]]; then
-    echo "SKIP_CLEANUP is set — leaving resources in place."
+    echo "SKIP_CLEANUP is set -- leaving resources in place."
     return
   fi
   echo "Cleaning up..."
-  oc mtv delete plan     --name "${PLAN}" --skip-archive -n "${NS}" 2>/dev/null || true
+  oc mtv delete plan     --name "${PLAN}" -n "${NS}" 2>/dev/null || true
   oc mtv delete provider --name "${PROVIDER}" -n "${NS}"            2>/dev/null || true
   oc mtv delete provider --name host -n "${NS}"                     2>/dev/null || true
   oc delete namespace "${NS}" --ignore-not-found                    2>/dev/null || true
+
+  # Test-specific: reset the controller image modified by this test (not part of general cleanup)
   oc mtv settings unset --setting controller_image_fqin             2>/dev/null || true
   echo "Cleanup done."
 }
 trap cleanup EXIT
 cleanup
+
+echo "=========================================="
+echo "MTV-4911 Test"
+echo "=========================================="
 
 # --- STEP 0: Set controller image ---
 echo "STEP 0: Setting controller image"
@@ -115,7 +121,7 @@ oc wait "plan.forklift.konveyor.io/${PLAN}" -n "${NS}" \
 echo "Plan is executing."
 
 # --- STEP 5: Break the provider ---
-echo "STEP 5: Breaking provider — patching URL to ${BROKEN_URL}"
+echo "STEP 5: Breaking provider -- patching URL to ${BROKEN_URL}"
 oc mtv patch provider --name "${PROVIDER}" --url "${BROKEN_URL}" -n "${NS}"
 echo "Provider URL is now broken. Grace period clock starts."
 
@@ -126,7 +132,7 @@ while (( elapsed < OUTAGE_WAIT )); do
   sleep "${POLL}"
   elapsed=$(( elapsed + POLL ))
   plan_out=$(oc mtv get plan --name "${PLAN}" -n "${NS}" 2>&1) || true
-  echo "  ${elapsed}/${OUTAGE_WAIT}s — $(echo "${plan_out}" | tail -1)"
+  echo "  ${elapsed}/${OUTAGE_WAIT}s -- $(echo "${plan_out}" | tail -1)"
 
   if echo "${plan_out}" | grep -qi "Failed"; then
     echo "TEST FAILED: Plan failed during the grace window (old behavior)."
@@ -159,7 +165,7 @@ while (( complete_elapsed < COMPLETE_WAIT )); do
   if echo "${plan_out}" | grep -qi "Failed";    then echo "Migration FAILED.";    break; fi
   if echo "${plan_out}" | grep -qi "Canceled";  then echo "Migration CANCELED.";  break; fi
 
-  echo "  still executing... (${complete_elapsed}s) — $(echo "${plan_out}" | tail -1)"
+  echo "  still executing... (${complete_elapsed}s) -- $(echo "${plan_out}" | tail -1)"
 done
 
 if (( complete_elapsed >= COMPLETE_WAIT )) && ! echo "${plan_out}" | grep -qiE "Succeeded|Failed|Canceled"; then
@@ -169,13 +175,19 @@ fi
 
 # --- Summary ---
 echo ""
+echo "=========================================="
+echo "RESULT"
+echo "=========================================="
 if echo "${plan_out}" | grep -qi "Succeeded"; then
-  echo "TEST PASSED: Migration survived transient provider outage and completed successfully."
+  echo "TEST PASSED: MTV-4911"
+  echo "Migration survived transient provider outage and completed successfully."
   exit 0
 elif echo "${plan_out}" | grep -qi "Canceled"; then
-  echo "TEST INCONCLUSIVE: Migration was canceled (not failed). Grace period worked but migration did not recover."
+  echo "TEST INCONCLUSIVE: MTV-4911"
+  echo "Migration was canceled (not failed). Grace period worked but migration did not recover."
   exit 2
 else
-  echo "TEST FAILED: Check the logs above for details."
+  echo "TEST FAILED: MTV-4911"
+  echo "Check the logs above for details."
   exit 1
 fi

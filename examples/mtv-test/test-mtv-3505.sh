@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Test: MTV-3505 — VMware Serial Number Feature Flag
+# Test: MTV-3505 - VMware Serial Number Feature Flag
 #
 # Verifies that the feature_vmware_system_serial_number feature flag correctly
 # controls whether the VMware-formatted system serial number is used.
@@ -35,15 +35,17 @@ MIGRATION_TIMEOUT=1800
 # --- Cleanup ---
 cleanup() {
   if [[ "${SKIP_CLEANUP}" == "true" ]]; then
-    echo "SKIP_CLEANUP is set — leaving resources in place."
+    echo "SKIP_CLEANUP is set -- leaving resources in place."
     return
   fi
   echo "Cleaning up..."
-  oc mtv delete plan --name "${PLAN_ENABLED}" --skip-archive -n "${NS}" 2>/dev/null || true
-  oc mtv delete plan --name "${PLAN_DISABLED}" --skip-archive -n "${NS}" 2>/dev/null || true
+  oc mtv delete plan --name "${PLAN_ENABLED}" -n "${NS}" 2>/dev/null || true
+  oc mtv delete plan --name "${PLAN_DISABLED}" -n "${NS}" 2>/dev/null || true
   oc mtv delete provider --name "${PROVIDER}" -n "${NS}" 2>/dev/null || true
   oc mtv delete provider --name host -n "${NS}" 2>/dev/null || true
   oc delete namespace "${NS}" --ignore-not-found 2>/dev/null || true
+
+  # Test-specific: reset the feature flag modified by this test (not part of general cleanup)
   oc mtv settings unset --setting feature_vmware_system_serial_number 2>/dev/null || true
   echo "Cleanup done."
 }
@@ -141,15 +143,15 @@ SERIAL_ENABLED=$(oc get vm "${VM}" -n "${NS}" -o jsonpath='{.spec.template.spec.
 echo "Serial: ${SERIAL_ENABLED}"
 
 if [[ "${SERIAL_ENABLED}" == VMware-* ]]; then
-  echo "✓ PASS: Serial starts with 'VMware-'"
+  echo "PASS: Serial starts with 'VMware-'"
 else
-  echo "✗ FAIL: Serial does not start with 'VMware-'"
+  echo "FAIL: Serial does not start with 'VMware-'"
   exit 1
 fi
 
 # --- Clean up scenario 1 ---
 echo "Cleaning up scenario 1..."
-oc mtv delete plan --name "${PLAN_ENABLED}" --skip-archive -n "${NS}"
+oc mtv delete plan --name "${PLAN_ENABLED}" -n "${NS}"
 oc delete vm "${VM}" -n "${NS}"
 
 echo ""
@@ -188,17 +190,19 @@ SERIAL_DISABLED=$(oc get vm "${VM}" -n "${NS}" -o jsonpath='{.spec.template.spec
 echo "Serial: ${SERIAL_DISABLED}"
 
 if [[ "${SERIAL_DISABLED}" != VMware-* ]]; then
-  echo "✓ PASS: Serial does not start with 'VMware-'"
+  echo "PASS: Serial does not start with 'VMware-'"
 else
-  echo "✗ FAIL: Serial starts with 'VMware-' when feature is disabled"
+  echo "FAIL: Serial starts with 'VMware-' when feature is disabled"
   exit 1
 fi
 
 # --- Summary ---
 echo ""
 echo "=========================================="
-echo "TEST PASSED: MTV-3505"
+echo "RESULT"
 echo "=========================================="
 echo "Serial (enabled):  ${SERIAL_ENABLED}"
 echo "Serial (disabled): ${SERIAL_DISABLED}"
+echo ""
+echo "TEST PASSED: MTV-3505"
 exit 0

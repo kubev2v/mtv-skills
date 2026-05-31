@@ -59,7 +59,7 @@ echo ""
 # ===================================================================
 cleanup() {
   if [[ "${SKIP_CLEANUP}" == "true" ]]; then
-    echo "SKIP_CLEANUP=true — preserving resources in namespace '${NS}' for forensic inspection."
+    echo "SKIP_CLEANUP=true -- preserving resources in namespace '${NS}' for forensic inspection."
     return 0
   fi
   echo "Cleaning up..."
