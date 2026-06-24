@@ -191,6 +191,10 @@ oc debug-queries logs --name deployment/forklift-controller --namespace <forklif
 
 Key pods: `forklift-controller` (main migration controller), `forklift-api`, `forklift-validation`, `forklift-volume-populator-controller`.
 
+Pod label selectors (for `oc delete pod -l`, `oc get pod -l`, etc.):
+- All Forklift pods: `-l app=forklift`
+- Controller only: `-l app=forklift,control-plane=controller-manager`
+
 ### Querying Forklift logs
 
 Before writing log queries, discover the actual field names and values:
