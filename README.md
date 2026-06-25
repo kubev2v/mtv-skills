@@ -20,10 +20,15 @@ Just open a chat and ask. Here's one high-impact example per skill:
 
 ## Quick Start
 
+### Cursor / Claude Code
+
+```bash
+curl -sSL https://raw.githubusercontent.com/kubev2v/mtv-skills/main/install.sh | bash
+```
+
 ### Claude Code (plugin install)
 
 ```bash
-# Add the marketplace and install the plugin
 claude plugin marketplace add kubev2v/mtv-skills
 claude plugin install mtv-skills@kubev2v
 ```
@@ -34,30 +39,7 @@ To update later:
 claude plugin update mtv-skills@kubev2v
 ```
 
-Or test locally from a cloned repo:
-
-```bash
-claude --plugin-dir ./mtv-skills
-```
-
-### Cursor (symlink install)
-
-```bash
-git clone https://github.com/kubev2v/mtv-skills.git ~/.local/share/mtv-skills
-
-mkdir -p ~/.cursor/skills
-for skill in ~/.local/share/mtv-skills/skills/*/; do
-  ln -sfn "$skill" ~/.cursor/skills/"$(basename "$skill")"
-done
-```
-
-To update later:
-
-```bash
-git -C ~/.local/share/mtv-skills pull
-```
-
-For Claude Code per-project installs, Cursor per-project installs, and removal see [docs/install.md](docs/install.md).
+For per-project installs, removal, and other options see [docs/install.md](docs/install.md).
 
 ## Prerequisites
 

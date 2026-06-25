@@ -4,12 +4,47 @@
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or [Cursor](https://www.cursor.com/) installed and configured
 
-## Claude Code Plugin (recommended)
+## Cursor / Claude Code
+
+```bash
+curl -sSL https://raw.githubusercontent.com/kubev2v/mtv-skills/main/install.sh | bash
+```
+
+The script clones the repo to `~/.local/share/mtv-skills` (or pulls if already
+present) and creates user-wide symlinks in `~/.cursor/skills` and/or
+`~/.claude/skills` depending on which directories exist.
+
+Run the same command again any time to update.
+
+To override the clone location:
+
+```bash
+MTV_SKILLS_DIR=~/my-custom-path curl -sSL https://raw.githubusercontent.com/kubev2v/mtv-skills/main/install.sh | bash
+```
+
+**Per-project** (available only in a specific project):
+
+```bash
+MTV_SKILLS_DIR="${MTV_SKILLS_DIR:-$HOME/.local/share/mtv-skills}"
+
+# From inside the target project directory — Cursor
+mkdir -p .cursor/skills
+for skill in "$MTV_SKILLS_DIR"/skills/*/; do
+  ln -sfn "$skill" .cursor/skills/"$(basename "$skill")"
+done
+
+# From inside the target project directory — Claude Code
+mkdir -p .claude/skills
+for skill in "$MTV_SKILLS_DIR"/skills/*/; do
+  ln -sfn "$skill" .claude/skills/"$(basename "$skill")"
+done
+```
+
+## Claude Code Plugin (alternative)
 
 Install as a Claude Code plugin — no cloning or symlinks needed:
 
 ```bash
-# Add the marketplace and install the plugin
 claude plugin marketplace add kubev2v/mtv-skills
 claude plugin install mtv-skills@kubev2v
 ```
@@ -28,68 +63,6 @@ To uninstall:
 
 ```bash
 claude plugin uninstall mtv-skills@kubev2v
-```
-
-## Claude Code Symlinks (alternative)
-
-If you prefer managing skills as symlinks instead of a plugin:
-
-```bash
-git clone https://github.com/kubev2v/mtv-skills.git ~/.local/share/mtv-skills
-```
-
-**User-wide** (available in all your projects):
-
-```bash
-mkdir -p ~/.claude/skills
-
-for skill in ~/.local/share/mtv-skills/skills/*/; do
-  ln -sfn "$skill" ~/.claude/skills/"$(basename "$skill")"
-done
-```
-
-**Per-project** (available only in a specific project):
-
-```bash
-# From inside the target project directory
-mkdir -p .claude/skills
-
-for skill in ~/.local/share/mtv-skills/skills/*/; do
-  ln -sfn "$skill" .claude/skills/"$(basename "$skill")"
-done
-```
-
-## Cursor
-
-```bash
-git clone https://github.com/kubev2v/mtv-skills.git ~/.local/share/mtv-skills
-```
-
-**User-wide** (available in all your projects):
-
-```bash
-mkdir -p ~/.cursor/skills
-
-for skill in ~/.local/share/mtv-skills/skills/*/; do
-  ln -sfn "$skill" ~/.cursor/skills/"$(basename "$skill")"
-done
-```
-
-**Per-project** (available only in a specific project):
-
-```bash
-# From inside the target project directory
-mkdir -p .cursor/skills
-
-for skill in ~/.local/share/mtv-skills/skills/*/; do
-  ln -sfn "$skill" .cursor/skills/"$(basename "$skill")"
-done
-```
-
-To update:
-
-```bash
-git -C ~/.local/share/mtv-skills pull
 ```
 
 ## CLI Plugin Prerequisites
