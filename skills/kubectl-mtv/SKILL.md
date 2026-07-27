@@ -206,6 +206,42 @@ oc mtv get plan --vms-table -n <namespace>
 oc mtv get plan --vms-table --query "where planStatus = 'Failed'" -n <namespace>
 ```
 
+#### Migration resource labels
+
+During a migration, Kubernetes resources across the pipeline carry labels that allow
+cross-referencing. The guest conversion (virt-v2v) pod has the richest labeling.
+
+**Label reference by resource type:**
+
+| Resource | `plan` (UUID) | `plan-name` | `plan-namespace` | `migration` (UUID) | `vmID` | Other |
+|---|---|---|---|---|---|---|
+| **virt-v2v pod** | ✓ | ✓ | ✓ | ✓ | ✓ | `conversion`, `conversion-type`, `forklift.app: virt-v2v`, `resource: vm-config` |
+| **DataVolume** | ✓ | ✓ | ✓ | ✓ | ✓ | `resource: vm-config` |
+| **PVC** | — | ✓ | ✓ | — | ✓ | `resource: vm-config` |
+| **vddk job** | ✓ | — | — | — | — | `vddk` (session UUID) |
+
+Key differences:
+- **PVC** does NOT have `plan` (UUID) or `migration` (UUID) — only `plan-name` and `plan-namespace`
+- **vddk job** does NOT have `plan-name`, `migration`, or `vmID` — only `plan` (UUID) and `vddk` (UUID)
+- **virt-v2v pod** has ALL labels — best anchor for cross-referencing
+
+**Querying by label:**
+
+```bash
+# By migration UUID
+MIGRATION_ID="da65210f-..."
+oc get pods -l "migration=${MIGRATION_ID}" -n test
+oc get dv -l "migration=${MIGRATION_ID}" -n test
+
+# By plan name
+oc get pods -l "plan-name=test-migration" -n test
+oc get dv -l "plan-name=test-migration" -n test
+oc get pvc -l "plan-name=test-migration" -n test
+
+# By VM ID (vSphere VM inventory ID)
+oc get pods -l "vmID=vm-1141" -n test
+```
+
 ### 10. View logs
 
 The `health` command includes built-in log analysis. Use `--skip-logs` to disable and `--log-lines` to control how many lines per pod are analyzed:
@@ -234,7 +270,7 @@ Full-text search when you don't know which field contains the value:
 oc debug-queries logs --name deployment/forklift-controller --namespace <forklift-namespace> --container main --tail 200 --query "where raw_line ~= '.*<search-term>.*'"
 ```
 
-**Note:** When using `deployment/forklift-controller` in log queries, Kubernetes resolves the pods via the deployment's selector automatically. If referencing pods directly (e.g., `--selector` or by pod name), use the labels documented in [Forklift Pod Labels](#forklift-pod-labels).
+**Note:** When using `deployment/forklift-controller` in log queries, Kubernetes resolves the pods via the deployment's selector automatically. If referencing pods directly (e.g., `--selector` or by pod name), use the labels documented in [Forklift Pod Labels](#forklift-pod-labels). For migration-specific resources (DVs, PVCs, virt-v2v pods), use the labels documented in [Migration resource labels](#migration-resource-labels).
 
 ### 11. Plan lifecycle
 
@@ -339,26 +375,6 @@ select name where any(concerns[*].category = 'Critical') order by name asc limit
 - `concerns[*].category` (Critical, Warning, Information)
 - `path` (folder path), `host`, `storageUsed`
 
-## Other Resources
-
-```bash
-oc mtv get mapping network -n <namespace>
-oc mtv get mapping storage -n <namespace>
-
-oc mtv create mapping network --name my-net --source my-vsphere --target host \
-  --network-pairs "VM Network:default" -n <namespace>
-
-oc mtv create mapping storage --name my-store --source my-vsphere --target host \
-  --storage-pairs "datastore1:standard" -n <namespace>
-
-oc mtv get hook -n <namespace>
-oc mtv get host -n <namespace>
-
-oc mtv describe plan --name my-migration -n <namespace>
-oc mtv describe provider --name my-vsphere -n <namespace>
-oc mtv describe mapping network --name my-net -n <namespace>
-```
-
 ## KARL Affinity Syntax
 
 The `create plan` and `patch plan` commands support `--target-affinity` and `--convertor-affinity` flags using KARL syntax for pod placement rules:
@@ -389,14 +405,6 @@ All Forklift pods share the label `app=forklift`. Additional distinguishing labe
 | `forklift-volume-populator-controller-*` | (none — only `app=forklift`) |
 
 When referencing pods directly (not via `deployment/...`), use `app=forklift`. The label is **`app=forklift`**, not `app=forklift-controller`.
-
-## Tips
-
-### Preview commands with `--dry-run`
-
-```bash
-oc mtv create plan --name test --source my-vsphere --vms vm1 -n <namespace> --dry-run
-```
 
 ## Self-Learning Rule
 
