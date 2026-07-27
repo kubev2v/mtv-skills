@@ -174,7 +174,6 @@ echo "STEP 5: Create manual Network Map"
 echo "=========================================="
 
 echo "Creating network map..."
-echo "Command: oc mtv create mapping network --name ${NETWORKMAP} --source ${PROVIDER} --target host --network-pairs \"${SOURCE_NETWORK}:${NAD1}\" -n ${NS}"
 oc mtv create mapping network --name "${NETWORKMAP}" \
   --source "${PROVIDER}" \
   --target host \
@@ -184,7 +183,6 @@ oc mtv create mapping network --name "${NETWORKMAP}" \
 echo "Network map created."
 echo ""
 echo "Getting network map YAML..."
-echo "Command: oc mtv get mapping ${NETWORKMAP} -n ${NS} -o yaml"
 oc mtv get mapping "${NETWORKMAP}" -n "${NS}" -o yaml
 echo ""
 

@@ -130,31 +130,14 @@ oc mtv start plan --name "${PLAN_NAME}" --namespace "${PROVIDER_NS}" 2>&1
 
 echo "Waiting for migration to complete..."
 TIMEOUT=900
-ELAPSED=0
-while [[ ${ELAPSED} -lt ${TIMEOUT} ]]; do
-  PHASE=$(oc get plan "${PLAN_NAME}" -n "${PROVIDER_NS}" \
-    -o jsonpath='{.status.migration.vms[0].phase}' 2>/dev/null || echo "")
-  echo "  [${ELAPSED}s] VM phase: ${PHASE}"
-  case "${PHASE}" in
-    Completed)
-      echo "Migration completed successfully."
-      break
-      ;;
-    Failed)
-      echo "Migration failed."
-      oc get plan "${PLAN_NAME}" -n "${PROVIDER_NS}" \
-        -o jsonpath='{.status.migration.vms[0].error}' 2>&1 || true
-      break
-      ;;
-  esac
-  sleep ${POLL}
-  ELAPSED=$((ELAPSED + POLL))
-done
-
-if [[ ${ELAPSED} -ge ${TIMEOUT} ]]; then
-  echo "TEST INCONCLUSIVE: Migration did not complete within ${TIMEOUT}s"
-  exit 2
+if ! oc wait "plan.forklift.konveyor.io/${PLAN_NAME}" -n "${PROVIDER_NS}" \
+  --for=condition=Succeeded --timeout="${TIMEOUT}s"; then
+  echo "TEST FAILED: Migration did not succeed within ${TIMEOUT}s."
+  oc get plan "${PLAN_NAME}" -n "${PROVIDER_NS}" \
+    -o jsonpath='{.status.migration.vms[0].phase}' 2>/dev/null || true
+  exit 1
 fi
+echo "Migration completed successfully."
 echo ""
 
 # ===================================================================

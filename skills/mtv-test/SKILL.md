@@ -239,7 +239,11 @@ target storage class. When you do need to override, use explicit `--storage-pair
 - Always register `trap cleanup EXIT` and call `cleanup` at the start
 - Cleanup must be idempotent (`2>/dev/null || true` on all delete commands)
 - Namespace name, provider name, and plan name are derived from the ticket number
-- Use `oc wait --for=condition=Ready` with explicit timeouts after each resource creation.
+- **Prefer `oc mtv` CLI commands** (e.g. `oc mtv create provider`, `oc mtv create plan`,
+  `oc mtv start plan`, `oc mtv delete plan`) over raw YAML with `oc create`/`oc apply`.
+  The CLI handles secrets, mappings, and labels automatically. Only fall back to YAML
+  when the CLI does not support the required operation.
+- **Prefer `oc wait`** over polling loops. Use `oc wait --for=condition=Ready` with explicit timeouts after each resource creation.
   **When a test expects a resource to NOT be Ready** (e.g. a plan that should be
   blocked by a validation condition), use the `wait_for_plan_condition` polling helper
   from [ref-helpers.md](ref-helpers.md) instead.

@@ -8,8 +8,13 @@ customization-scripts, vddk-conf) are automatically deleted when the migration f
 ## Prerequisites
 - oc with mtv plugin installed
 - MTV installed on the cluster with the MTV-5723 fix deployed
-- Environment variables set: `PROVIDER_NS`, `PROVIDER_NAME`, `VM_NAME` (or use defaults)
 - A vSphere provider already configured in the provider namespace
+- Optional environment variables:
+  - `PROVIDER_NS` — namespace of the existing provider (default: `openshift-mtv`)
+  - `PROVIDER_NAME` — name of the existing vSphere provider (default: `vmware-7`)
+  - `VM_NAME` — VM to migrate (default: `mtv-feature-rhel7-2`)
+  - `TARGET_NS` — target namespace for migration (default: `mtv-5723-test`)
+  - `SKIP_CLEANUP` — set to `true` to preserve resources after test
 
 ## Test Steps
 1. Create a target namespace distinct from the provider namespace

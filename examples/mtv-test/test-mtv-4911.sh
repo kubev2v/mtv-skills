@@ -65,7 +65,6 @@ echo "=========================================="
 
 # --- STEP 0: Set controller image ---
 echo "STEP 0: Setting controller image"
-echo ">>> oc mtv settings set --setting controller_image_fqin --value ${FIXED_IMAGE}"
 oc mtv settings set --setting controller_image_fqin --value "${FIXED_IMAGE}"
 
 echo "Waiting for controller rollout..."
@@ -80,7 +79,6 @@ oc create namespace "${NS}" --dry-run=client -o yaml | oc apply -f -
 
 # --- STEP 2: Create providers ---
 echo "STEP 2: Creating vSphere provider '${PROVIDER}'"
-echo ">>> oc mtv create provider --name ${PROVIDER} --type vsphere --url ${REAL_URL} --username \${GOVC_USERNAME} --password \${GOVC_PASSWORD} --provider-insecure-skip-tls -n ${NS}"
 oc mtv create provider \
   --name "${PROVIDER}" \
   --type vsphere \
@@ -90,7 +88,6 @@ oc mtv create provider \
   --provider-insecure-skip-tls \
   -n "${NS}"
 
-echo ">>> oc mtv create provider --name host --type openshift -n ${NS}"
 oc mtv create provider --name host --type openshift -n "${NS}"
 
 echo "Waiting for providers Ready..."
@@ -102,7 +99,6 @@ echo "Providers ready."
 
 # --- STEP 3: Create migration plan ---
 echo "STEP 3: Creating plan '${PLAN}' for VM '${VM}'"
-echo ">>> oc mtv create plan --name ${PLAN} --source ${PROVIDER} --vms ${VM} -n ${NS}"
 oc mtv create plan --name "${PLAN}" --source "${PROVIDER}" --vms "${VM}" -n "${NS}"
 
 echo "Waiting for plan Ready..."
@@ -112,7 +108,6 @@ echo "Plan ready."
 
 # --- STEP 4: Start migration ---
 echo "STEP 4: Starting plan '${PLAN}'"
-echo ">>> oc mtv start plan --name ${PLAN} -n ${NS}"
 oc mtv start plan --name "${PLAN}" -n "${NS}"
 
 echo "Waiting for Executing..."
@@ -154,22 +149,14 @@ echo "Provider ready."
 
 # --- STEP 8: Wait for migration completion ---
 echo "STEP 8: Waiting for migration to complete (timeout ${COMPLETE_WAIT}s)..."
-plan_out=$(oc mtv get plan --name "${PLAN}" -n "${NS}" 2>&1 || true)
-complete_elapsed=0
-while (( complete_elapsed < COMPLETE_WAIT )); do
-  sleep "${POLL}"
-  complete_elapsed=$(( complete_elapsed + POLL ))
-  plan_out=$(oc mtv get plan --name "${PLAN}" -n "${NS}" 2>&1) || true
-
-  if echo "${plan_out}" | grep -qi "Succeeded"; then echo "Migration SUCCEEDED."; break; fi
-  if echo "${plan_out}" | grep -qi "Failed";    then echo "Migration FAILED.";    break; fi
-  if echo "${plan_out}" | grep -qi "Canceled";  then echo "Migration CANCELED.";  break; fi
-
-  echo "  still executing... (${complete_elapsed}s) -- $(echo "${plan_out}" | tail -1)"
-done
-
-if (( complete_elapsed >= COMPLETE_WAIT )) && ! echo "${plan_out}" | grep -qiE "Succeeded|Failed|Canceled"; then
-  echo "TEST FAILED: Timed out after ${COMPLETE_WAIT}s waiting for a terminal state."
+if ! oc wait "plan.forklift.konveyor.io/${PLAN}" -n "${NS}" \
+  --for=condition=Succeeded --timeout="${COMPLETE_WAIT}s"; then
+  echo ""
+  echo "=========================================="
+  echo "RESULT"
+  echo "=========================================="
+  echo "TEST FAILED: MTV-4911"
+  echo "Migration did not succeed within ${COMPLETE_WAIT}s after provider recovery."
   exit 1
 fi
 
@@ -178,16 +165,6 @@ echo ""
 echo "=========================================="
 echo "RESULT"
 echo "=========================================="
-if echo "${plan_out}" | grep -qi "Succeeded"; then
-  echo "TEST PASSED: MTV-4911"
-  echo "Migration survived transient provider outage and completed successfully."
-  exit 0
-elif echo "${plan_out}" | grep -qi "Canceled"; then
-  echo "TEST INCONCLUSIVE: MTV-4911"
-  echo "Migration was canceled (not failed). Grace period worked but migration did not recover."
-  exit 2
-else
-  echo "TEST FAILED: MTV-4911"
-  echo "Check the logs above for details."
-  exit 1
-fi
+echo "TEST PASSED: MTV-4911"
+echo "Migration survived transient provider outage and completed successfully."
+exit 0
