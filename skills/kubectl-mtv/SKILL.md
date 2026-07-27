@@ -42,6 +42,8 @@ oc mtv health --all-namespaces
 oc mtv health --skip-logs
 ```
 
+The health output shows the Forklift operator namespace. See [Forklift Pod Labels](#forklift-pod-labels) for pod label details.
+
 ### 2. Configure settings (e.g., VDDK image for vSphere)
 
 ```bash
@@ -232,6 +234,8 @@ Full-text search when you don't know which field contains the value:
 oc debug-queries logs --name deployment/forklift-controller --namespace <forklift-namespace> --container main --tail 200 --query "where raw_line ~= '.*<search-term>.*'"
 ```
 
+**Note:** When using `deployment/forklift-controller` in log queries, Kubernetes resolves the pods via the deployment's selector automatically. If referencing pods directly (e.g., `--selector` or by pod name), use the labels documented in [Forklift Pod Labels](#forklift-pod-labels).
+
 ### 11. Plan lifecycle
 
 ```bash
@@ -372,6 +376,19 @@ oc mtv create plan --name my-plan --source my-vsphere --vms db-vm \
 ```
 
 For the full KARL reference, call `oc mtv help karl`.
+
+## Forklift Pod Labels
+
+All Forklift pods share the label `app=forklift`. Additional distinguishing labels:
+
+| Pod | Distinguishing label |
+| --- | --- |
+| `forklift-api-*` | `service=forklift-api` |
+| `forklift-controller-*` | `control-plane=controller-manager` |
+| `forklift-validation-*` | `service=forklift-validation` |
+| `forklift-volume-populator-controller-*` | (none — only `app=forklift`) |
+
+When referencing pods directly (not via `deployment/...`), use `app=forklift`. The label is **`app=forklift`**, not `app=forklift-controller`.
 
 ## Tips
 
