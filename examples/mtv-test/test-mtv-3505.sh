@@ -40,9 +40,8 @@ if ! oc mtv settings get --setting vddk_image &>/dev/null; then
 fi
 echo "MTV controller found."
 
-VDDK_IMAGE_CURRENT=$(oc mtv settings get --setting vddk_image 2>/dev/null \
-  | tail -1 | awk '{print $NF}')
-if [[ -n "${VDDK_IMAGE_CURRENT}" && "${VDDK_IMAGE_CURRENT}" != "<none>" && "${VDDK_IMAGE_CURRENT}" != "VALUE" ]]; then
+VDDK_IMAGE_CURRENT=$(oc mtv settings get --setting vddk_image 2>/dev/null | tr -d '[:space:]')
+if [[ -n "${VDDK_IMAGE_CURRENT}" && "${VDDK_IMAGE_CURRENT}" != "<none>" && "${VDDK_IMAGE_CURRENT}" != "(notset)" ]]; then
   echo "VDDK image configured: ${VDDK_IMAGE_CURRENT}"
 elif [[ -n "${VDDK_IMAGE:-}" ]]; then
   echo "Setting VDDK image..."

@@ -36,9 +36,8 @@ oc get crd plans.forklift.konveyor.io >/dev/null 2>&1 || {
   exit 1
 }
 
-VDDK_IMAGE=$(oc mtv settings get --setting vddk_image 2>/dev/null \
-  | tail -1 | awk '{print $NF}')
-if [[ -n "${VDDK_IMAGE}" && "${VDDK_IMAGE}" != "<none>" && "${VDDK_IMAGE}" != "VALUE" ]]; then
+VDDK_IMAGE=$(oc mtv settings get --setting vddk_image 2>/dev/null | tr -d '[:space:]')
+if [[ -n "${VDDK_IMAGE}" && "${VDDK_IMAGE}" != "<none>" && "${VDDK_IMAGE}" != "(notset)" ]]; then
   echo "VDDK image configured: ${VDDK_IMAGE}"
 else
   echo "ERROR: VDDK image not configured."
