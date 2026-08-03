@@ -15,6 +15,7 @@ Just open a chat and ask. Here's one high-impact example per skill:
 | *"Plot the forklift namespace RX/TX for the last 24h in a chart"* | **observe-metrics** |
 | *"Create a Fedora VM with 4 GiB RAM and start it"* | **kubectl-virt** |
 | *"Is Ceph healthy? Any OSDs near full?"* | **check-ceph-health** |
+| *"Ceph is full — run ceph commands and reclaim stuck PVs"* | **debug-ceph** |
 | *"Install the CLI plugins so I can use these tools"* | **mcp-setup** |
 | *"Write a verification script for MTV-4911"* | **mtv-test** |
 

@@ -31,6 +31,15 @@ Diagnoses Ceph/ODF storage health — OSDs, placement groups, capacity, CSI prov
 
 ---
 
+### [debug-ceph](../skills/debug-ceph/SKILL.md)
+
+Runs live `ceph` / `rbd` CLI inside Rook/ODF mon pods to debug capacity and reclaim stuck storage.
+
+**When used:** Ceph is `HEALTH_ERR` / `OSD_FULL`, PVs are stuck Terminating/Released, CSI cannot provision or delete volumes, or the user wants Ceph shell commands.
+**Triggered by:** "run ceph commands", "debug Ceph on the mon", "clean Ceph storage", "PVs stuck Terminating", "raise full ratio".
+
+---
+
 ### [troubleshoot-virt](../skills/troubleshoot-virt/SKILL.md)
 
 Troubleshoots stuck VMs and migrations in OpenShift Virtualization and MTV/Forklift.

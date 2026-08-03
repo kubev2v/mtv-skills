@@ -141,6 +141,7 @@ echo "Creating warm plan with convertorNodeSelector..."
 oc mtv create plan --name "${PLAN}" --source "${PROVIDER}" \
   --migration-type warm --vms "${VM}" \
   --convertor-node-selector "${NODE_LABEL_KEY}=${NODE_LABEL_VALUE}" \
+  --run-preflight-inspection false \
   -n "${NS}"
 
 echo "Waiting for plan to be ready..."
@@ -185,15 +186,89 @@ fi
 echo ""
 
 # ===================================================================
-#  STEP 6: Verify importer pod node selector and placement
+#  STEP 6: Verify VDDK extra-args ConfigMap
 # ===================================================================
 echo "=========================================="
-echo "STEP 6: Verifying importer pod scheduling"
+echo "STEP 6: Verifying VDDK extra-args ConfigMap"
+echo "=========================================="
+
+echo "Looking for VDDK extra-args ConfigMap..."
+VDDK_CM_NAME=$(oc get configmap -n "${NS}" -l use=vddk-conf \
+  --no-headers -o custom-columns=NAME:.metadata.name 2>/dev/null | head -1 || true)
+
+if [[ -z "${VDDK_CM_NAME}" ]]; then
+  echo "TEST FAILED: No VDDK extra-args ConfigMap found (label use=vddk-conf)."
+  echo "  This means Forklift did not create the ConfigMap for node selector propagation."
+  echo "  Ensure the Forklift build includes the MTV-3207 changes."
+  exit 1
+fi
+echo "Found ConfigMap: ${VDDK_CM_NAME}"
+
+echo "Checking vddk-node-selector key..."
+NS_VALUE=$(oc get configmap "${VDDK_CM_NAME}" -n "${NS}" \
+  -o jsonpath='{.data.vddk-node-selector}' 2>/dev/null || echo "")
+
+if [[ -z "${NS_VALUE}" ]]; then
+  echo "TEST FAILED: ConfigMap '${VDDK_CM_NAME}' does not contain 'vddk-node-selector' key."
+  echo "  ConfigMap data:"
+  oc get configmap "${VDDK_CM_NAME}" -n "${NS}" -o jsonpath='{.data}' 2>/dev/null || true
+  echo ""
+  exit 1
+fi
+
+EXPECTED_NS_JSON="{\"${NODE_LABEL_KEY}\":\"${NODE_LABEL_VALUE}\"}"
+if [[ "${NS_VALUE}" == "${EXPECTED_NS_JSON}" ]]; then
+  echo "vddk-node-selector verified: ${NS_VALUE}"
+else
+  echo "TEST FAILED: vddk-node-selector value mismatch."
+  echo "  Expected: ${EXPECTED_NS_JSON}"
+  echo "  Got:      ${NS_VALUE}"
+  exit 1
+fi
+echo ""
+
+# ===================================================================
+#  STEP 7: Verify DataVolume references the ConfigMap
+# ===================================================================
+echo "=========================================="
+echo "STEP 7: Verifying DataVolume ConfigMap reference"
+echo "=========================================="
+
+echo "Looking for DataVolume..."
+DV_NAME=$(oc get datavolume -n "${NS}" --no-headers \
+  -o custom-columns=NAME:.metadata.name 2>/dev/null | head -1 || true)
+
+if [[ -z "${DV_NAME}" ]]; then
+  echo "WARNING: No DataVolume found. Skipping DV ConfigMap annotation check."
+else
+  echo "Found DataVolume: ${DV_NAME}"
+  DV_CM_REF=$(oc get datavolume "${DV_NAME}" -n "${NS}" \
+    -o jsonpath='{.metadata.annotations.cdi\.kubevirt\.io/storage\.pod\.vddk-extra-args}' 2>/dev/null || echo "")
+
+  if [[ -n "${DV_CM_REF}" ]]; then
+    echo "DataVolume references VDDK extra-args ConfigMap: ${DV_CM_REF}"
+    if [[ "${DV_CM_REF}" == "${VDDK_CM_NAME}" ]]; then
+      echo "ConfigMap name matches: OK"
+    else
+      echo "WARNING: DV references '${DV_CM_REF}' but ConfigMap is '${VDDK_CM_NAME}'."
+    fi
+  else
+    echo "WARNING: DataVolume does not have vddk-extra-args annotation."
+    echo "  This is expected if the CDI version does not support CNV-84595."
+  fi
+fi
+echo ""
+
+# ===================================================================
+#  STEP 8: Verify importer pod node selector and placement
+# ===================================================================
+echo "=========================================="
+echo "STEP 8: Verifying importer pod scheduling"
 echo "=========================================="
 
 echo "Checking importer pod nodeSelector..."
 POD_NODE_SELECTOR=$(oc get pod "${IMPORTER_POD}" -n "${NS}" \
-  -o jsonpath="{.spec.nodeSelector.${NODE_LABEL_KEY}}" 2>/dev/null || echo "")
+  -o jsonpath="{.spec.nodeSelector['${NODE_LABEL_KEY}']}" 2>/dev/null || echo "")
 
 if [[ "${POD_NODE_SELECTOR}" != "${NODE_LABEL_VALUE}" ]]; then
   echo "TEST FAILED: Importer pod does not have expected nodeSelector."
@@ -228,10 +303,10 @@ fi
 echo ""
 
 # ===================================================================
-#  STEP 7: Cancel migration (cleanup will handle the rest)
+#  STEP 9: Cancel migration (cleanup will handle the rest)
 # ===================================================================
 echo "=========================================="
-echo "STEP 7: Canceling migration"
+echo "STEP 9: Canceling migration"
 echo "=========================================="
 echo "Test complete, canceling migration..."
 oc patch "migration.forklift.konveyor.io" -n "${NS}" \
@@ -245,9 +320,12 @@ echo ""
 echo "=========================================="
 echo "RESULT"
 echo "=========================================="
+echo "VDDK extra-args ConfigMap contains vddk-node-selector: OK"
 echo "ConvertorNodeSelector was propagated to CDI VDDK importer pod."
 echo "Importer pod has nodeSelector: ${NODE_LABEL_KEY}=${NODE_LABEL_VALUE}"
-echo "Importer pod scheduled on labeled node: ${LABELED_NODE}"
+if [[ -n "${POD_NODE}" ]]; then
+  echo "Importer pod scheduled on labeled node: ${POD_NODE}"
+fi
 echo ""
 echo "TEST PASSED: MTV-3207"
 exit 0
