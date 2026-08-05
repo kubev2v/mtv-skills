@@ -5,6 +5,12 @@ Include only the helpers that apply to the scenario being tested.
 
 ## CA Certificate Helper
 
+> **Security note (TOFU):** These helpers perform trust-on-first-use. They trust
+> whatever certificate the endpoint presents during the initial fetch. On untrusted
+> networks, obtain the CA certificate out-of-band (e.g. download from the vCenter UI
+> or the RHV engine PKI page over a pre-verified channel) and pass it directly via
+> `--cacert <file>`.
+
 Include when TLS verification is needed. Pick the variant that matches the provider type.
 
 ### Generic — extract from TLS handshake

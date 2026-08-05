@@ -22,35 +22,34 @@ oc debug-queries --help 2>/dev/null && echo "DEBUG_OK" || echo "DEBUG_MISSING"
 Based on the results above, tell the user **only** what is missing and provide
 the relevant install instructions. If everything is already installed, confirm it and move on.
 
-### Install kubectl-mtv (MTV/Forklift migrations)
+### Install all tools at once
 
-GitHub: [yaacov/kubectl-mtv](https://github.com/yaacov/kubectl-mtv)
-
-```bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/install.sh | bash
-```
-
-Verify: `oc mtv --help`
-
-### Install kubectl-metrics (Prometheus/Thanos metrics)
-
-GitHub: [yaacov/kubectl-metrics](https://github.com/yaacov/kubectl-metrics)
+Use the secure version-pinned installer (downloads binaries, verifies SHA256 checksums):
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh kubectl-mtv kubectl-metrics kubectl-debug-queries && rm install-tools.sh
 ```
 
-Verify: `oc metrics --help`
-
-### Install kubectl-debug-queries (Kubernetes resources, logs, events)
-
-GitHub: [yaacov/kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries)
+Or install individually:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
+bash install-tools.sh kubectl-mtv
+bash install-tools.sh kubectl-metrics
+bash install-tools.sh kubectl-debug-queries
 ```
 
-Verify: `oc debug-queries --help`
+Verify:
+
+```bash
+oc mtv --help
+oc metrics --help
+oc debug-queries --help
+```
+
+Versions and SHA256 checksums are pinned in `tools/versions.json`. To update to
+a new release, maintainers run `tools/update-versions.sh`.
 
 ### PATH setup
 
@@ -140,19 +139,19 @@ Requires Docker or Podman and a valid cluster token:
 docker run --rm -p 8080:8080 \
   -e MCP_KUBE_SERVER=https://api.cluster.example.com:6443 \
   -e MCP_KUBE_TOKEN=sha256~xxxx \
-  quay.io/yaacov/kubectl-mtv-mcp-server:latest
+  quay.io/yaacov/kubectl-mtv-mcp-server:v0.3.26
 
 # kubectl-metrics
 docker run --rm -p 8081:8080 \
   -e MCP_KUBE_SERVER=https://api.cluster.example.com:6443 \
   -e MCP_KUBE_TOKEN=sha256~xxxx \
-  quay.io/yaacov/kubectl-metrics-mcp-server:latest
+  quay.io/yaacov/kubectl-metrics-mcp-server:v0.1.13
 
 # kubectl-debug-queries
 docker run --rm -p 8082:8080 \
   -e MCP_KUBE_SERVER=https://api.cluster.example.com:6443 \
   -e MCP_KUBE_TOKEN=sha256~xxxx \
-  quay.io/yaacov/kubectl-debug-queries-mcp-server:latest
+  quay.io/yaacov/kubectl-debug-queries-mcp-server:v0.1.5
 ```
 
 Then configure your agent to connect via SSE at `http://localhost:8080/sse`,
@@ -160,12 +159,13 @@ Then configure your agent to connect via SSE at `http://localhost:8080/sse`,
 
 ### Deploy on OpenShift
 
-Deploy the MCP servers directly on the cluster:
+Deploy the MCP servers directly on the cluster (pin to the same versions as
+in `tools/versions.json`):
 
 ```bash
 # kubectl-mtv
-oc apply -f https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/deploy/mcp-server.yaml
+oc apply -f https://raw.githubusercontent.com/yaacov/kubectl-mtv/v0.3.26/deploy/mcp-server.yaml
 
 # kubectl-debug-queries
-oc apply -f https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/deploy/mcp-server.yaml
+oc apply -f https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/v0.1.5/deploy/mcp-server.yaml
 ```

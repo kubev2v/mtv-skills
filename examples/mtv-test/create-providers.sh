@@ -19,6 +19,9 @@ set -euo pipefail
 
 INSECURE_SKIP_TLS="${INSECURE_SKIP_TLS:-false}"
 
+# TOFU warning: These helpers trust whatever certificate the endpoint presents
+# during the initial fetch. On untrusted networks, obtain the CA out-of-band
+# (e.g. vCenter UI download) and pass it directly via --cacert <file>.
 fetch_ca_cert_tls() {
   local hostport host
   hostport=$(echo "$1" | sed -E 's|https?://||; s|/.*||')

@@ -44,6 +44,12 @@ export OVA_URL="10.8.3.97:/srv/examples"  # ip:/path
 
 ## Helper: Fetch CA Certificate
 
+> **Security note (TOFU):** This helper performs trust-on-first-use. It trusts
+> whatever certificate the endpoint presents during the initial fetch. On untrusted
+> networks, obtain the CA certificate out-of-band (e.g. download from the vCenter UI,
+> or the RHV engine PKI page over a pre-verified channel) and pass it directly via
+> `--cacert <file>` instead of using this helper.
+
 A reusable function that extracts the full certificate chain from any HTTPS endpoint.
 Handles URLs with custom ports (e.g. `:13000`) and defaults to 443 when none is specified.
 

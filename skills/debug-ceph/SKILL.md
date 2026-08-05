@@ -20,11 +20,12 @@ For lighter, metrics-first checks see also **check-ceph-health**.
 - `oc` / `kubectl` with access to `openshift-storage`
 - Cluster-admin (or equivalent) to exec into Rook mon pods
 
-Optional helpers:
+Optional helpers (secure version-pinned install):
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh kubectl-debug-queries kubectl-metrics && rm install-tools.sh
 ```
 
 ## Important: how to run Ceph commands

@@ -13,11 +13,12 @@ This skill requires:
 - `oc debug-queries` ([kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries)) -- for listing resources, logs, events
 - `oc metrics` ([kubectl-metrics](https://github.com/yaacov/kubectl-metrics)) -- for CPU/memory/node metrics
 
-If any tool is missing, install with:
+If any tool is missing, install with the secure version-pinned installer:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh kubectl-debug-queries kubectl-metrics && rm install-tools.sh
 ```
 
 ## Using `--query` for Filtering

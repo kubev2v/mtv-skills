@@ -16,7 +16,7 @@
 #   export GOVC_PASSWORD=secret
 #   export VM=my-rhel8-vm                # optional
 #   export CONTROLLER_NS=konveyor-forklift  # optional
-#   export FIXED_IMAGE=quay.io/yaacov/forklift-controller:mtv-4911-01-amd64  # optional
+#   export FIXED_IMAGE=quay.io/<your-registry>/forklift-controller:<your-tag>  # optional
 #   export OUTAGE_WAIT=120               # optional, seconds to keep provider broken
 #   export COMPLETE_WAIT=3600            # optional, migration timeout in seconds
 #   export SKIP_CLEANUP=true             # optional, preserve resources after test
@@ -27,7 +27,7 @@ set -euo pipefail
 # --- Configuration (override via environment) ---
 VM="${VM:-mtv-rhel8-sanity}"
 CONTROLLER_NS="${CONTROLLER_NS:-konveyor-forklift}"
-FIXED_IMAGE="${FIXED_IMAGE:-quay.io/yaacov/forklift-controller:mtv-4911-01-amd64}"
+FIXED_IMAGE="${FIXED_IMAGE:-quay.io/<your-registry>/forklift-controller:<your-tag>}"
 OUTAGE_WAIT="${OUTAGE_WAIT:-120}"
 COMPLETE_WAIT="${COMPLETE_WAIT:-3600}"
 SKIP_CLEANUP="${SKIP_CLEANUP:-false}"

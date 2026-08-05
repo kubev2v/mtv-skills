@@ -6,8 +6,13 @@
 
 ## Cursor / Claude Code
 
+Download the installer, verify its checksum, and run it:
+
 ```bash
-curl -sSL https://raw.githubusercontent.com/kubev2v/mtv-skills/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/install.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install.sh
+rm install.sh
 ```
 
 The script clones the repo to `~/.local/share/mtv-skills` (or pulls if already
@@ -15,30 +20,6 @@ present) and creates user-wide symlinks in `~/.cursor/skills` and/or
 `~/.claude/skills` depending on which directories exist.
 
 Run the same command again any time to update.
-
-To override the clone location:
-
-```bash
-MTV_SKILLS_DIR=~/my-custom-path curl -sSL https://raw.githubusercontent.com/kubev2v/mtv-skills/main/install.sh | bash
-```
-
-**Per-project** (available only in a specific project):
-
-```bash
-MTV_SKILLS_DIR="${MTV_SKILLS_DIR:-$HOME/.local/share/mtv-skills}"
-
-# From inside the target project directory — Cursor
-mkdir -p .cursor/skills
-for skill in "$MTV_SKILLS_DIR"/skills/*/; do
-  ln -sfn "$skill" .cursor/skills/"$(basename "$skill")"
-done
-
-# From inside the target project directory — Claude Code
-mkdir -p .claude/skills
-for skill in "$MTV_SKILLS_DIR"/skills/*/; do
-  ln -sfn "$skill" .claude/skills/"$(basename "$skill")"
-done
-```
 
 ## Claude Code Plugin (alternative)
 
@@ -68,29 +49,29 @@ claude plugin uninstall mtv-skills@kubev2v
 ## CLI Plugin Prerequisites
 
 Several skills use `oc` plugins for querying metrics, managing migrations, and
-inspecting cluster resources. Install them with the one-line installer (Linux / macOS):
+inspecting cluster resources. The secure installer downloads version-pinned
+binaries, verifies SHA256 checksums, installs to `~/.local/bin`, and creates
+shell completion helpers.
+
+Download the CLI installer, verify its checksum, then run:
 
 ```bash
-# kubectl-mtv (https://github.com/yaacov/kubectl-mtv)
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/install.sh | bash
-
-# kubectl-metrics (https://github.com/yaacov/kubectl-metrics)
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
-
-# kubectl-debug-queries (https://github.com/yaacov/kubectl-debug-queries)
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh            # all tools
+rm install-tools.sh
 ```
 
-All installers place binaries in `~/.local/bin` by default. If that directory
-is not in your PATH:
+To install specific tools only:
 
 ```bash
-# bash
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
-
-# zsh
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+bash install-tools.sh kubectl-mtv kubectl-metrics
 ```
+
+The script automatically fetches the version manifest
+([tools/versions.json](../tools/versions.json)) from GitHub.
+
+If `~/.local/bin` is not in your PATH the installer will print the command to add it.
 
 Verify the installation:
 

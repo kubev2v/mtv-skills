@@ -52,3 +52,16 @@ fi
 echo ""
 ok "Done! Skills are ready to use."
 info "Re-run this command any time to update."
+
+# --- optional: install CLI tools with hash verification -----------------------
+if [ "${INSTALL_CLI_TOOLS:-0}" = "1" ]; then
+  echo ""
+  info "Installing CLI tools (INSTALL_CLI_TOOLS=1) ..."
+  "$INSTALL_DIR/tools/install-tools.sh"
+else
+  echo ""
+  info "To also install the CLI plugins (kubectl-mtv, kubectl-metrics, etc.):"
+  info "  INSTALL_CLI_TOOLS=1 bash \"$INSTALL_DIR/install.sh\""
+  info "Or run directly:"
+  info "  $INSTALL_DIR/tools/install-tools.sh"
+fi

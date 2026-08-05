@@ -74,7 +74,7 @@ When running in headless mode, execute these steps without prompting:
 | Namespace | `mtv-<number>-test` |
 | Provider name | `<type>-test` |
 | Plan name | `mtv-<number>-plan` |
-| TLS mode | `--provider-insecure-skip-tls` |
+| TLS mode | `--cacert` (use `fetch_ca_cert` from ref-helpers.md) |
 | VM name | `${VM:-my-test-vm}` |
 | SKIP_CLEANUP | `${SKIP_CLEANUP:-false}` |
 | Credentials | Environment variable references (never hardcoded) |
