@@ -14,12 +14,12 @@ This skill requires:
 - `oc mtv` ([kubectl-mtv](https://github.com/yaacov/kubectl-mtv)) -- for MTV health, plans, providers
 - `oc metrics` ([kubectl-metrics](https://github.com/yaacov/kubectl-metrics)) -- for node resource usage
 
-If any tool is missing, install with:
+If any tool is missing, install with the secure version-pinned installer:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/install.sh | bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh kubectl-debug-queries kubectl-mtv kubectl-metrics && rm install-tools.sh
 ```
 
 ## Quick Triage Checklist

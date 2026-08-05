@@ -12,25 +12,39 @@ See the main [SKILL.md](SKILL.md) for connection setup, VM workflows, and common
 brew install govc
 ```
 
-## Manual binary download
+## Secure version-pinned install (recommended)
 
-Download from the [govmomi releases](https://github.com/vmware/govmomi/releases) page:
+Use the project installer which downloads a pinned version and verifies the SHA256 checksum:
 
 ```bash
-# Detect OS and architecture
-OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh govc && rm install-tools.sh
+```
 
-# Fetch the latest release tag
-VERSION=$(curl -s https://api.github.com/repos/vmware/govmomi/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+The version and checksums are tracked in `tools/versions.json`.
 
-# Download and install
-curl -fSL -o govc.gz \
-  "https://github.com/vmware/govmomi/releases/download/${VERSION}/govc_${OS}_${ARCH}.gz"
-gunzip govc.gz
+## Manual binary download
+
+Download from the [govmomi releases](https://github.com/vmware/govmomi/releases) page.
+Pin to a known version and verify the checksum:
+
+```bash
+VERSION="v0.55.1"
+
+OS=$(uname -s)   # Darwin or Linux
+ARCH=$(uname -m) # x86_64 or arm64
+
+curl -fSL -o govc.tar.gz \
+  "https://github.com/vmware/govmomi/releases/download/${VERSION}/govc_${OS}_${ARCH}.tar.gz"
+
+# Verify SHA256 — compare against tools/versions.json
+shasum -a 256 govc.tar.gz
+
+tar xzf govc.tar.gz govc
 mkdir -p ~/.local/bin
 install -m 0755 govc ~/.local/bin/govc
-rm -f govc
+rm -f govc govc.tar.gz
 ```
 
 Ensure `~/.local/bin` is in your PATH:

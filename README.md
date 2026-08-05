@@ -24,7 +24,9 @@ Just open a chat and ask. Here's one high-impact example per skill:
 ### Cursor / Claude Code
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/kubev2v/mtv-skills/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/install.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install.sh && rm install.sh
 ```
 
 ### Claude Code (plugin install)
@@ -40,22 +42,18 @@ To update later:
 claude plugin update mtv-skills@kubev2v
 ```
 
-For per-project installs, removal, and other options see [docs/install.md](docs/install.md).
+For removal and other options see [docs/install.md](docs/install.md).
 
 ## Prerequisites
 
 Several skills use CLI plugins that must be installed on your machine. The **mcp-setup** skill
-can guide you through installation, or install manually:
+can guide you through installation, or install manually using the version-pinned, hash-verified
+installer:
 
 ```bash
-# kubectl-mtv (https://github.com/yaacov/kubectl-mtv)
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/install.sh | bash
-
-# kubectl-metrics (https://github.com/yaacov/kubectl-metrics)
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
-
-# kubectl-debug-queries (https://github.com/yaacov/kubectl-debug-queries)
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh && rm install-tools.sh
 ```
 
 | Plugin | CLI command |

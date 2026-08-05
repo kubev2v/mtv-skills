@@ -147,9 +147,9 @@ This will:
 
 | Container | Host Port | Image |
 |-----------|-----------|-------|
-| kubectl-mtv | 8080 | `quay.io/yaacov/kubectl-mtv-mcp-server:latest` |
-| kubectl-metrics | 8081 | `quay.io/yaacov/kubectl-metrics-mcp-server:latest` |
-| kubectl-debug-queries | 8082 | `quay.io/yaacov/kubectl-debug-queries-mcp-server:latest` |
+| kubectl-mtv | 8080 | `quay.io/yaacov/kubectl-mtv-mcp-server:v0.3.26` |
+| kubectl-metrics | 8081 | `quay.io/yaacov/kubectl-metrics-mcp-server:v0.1.13` |
+| kubectl-debug-queries | 8082 | `quay.io/yaacov/kubectl-debug-queries-mcp-server:v0.1.5` |
 
 ### Common Start Options
 

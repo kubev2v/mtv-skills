@@ -13,11 +13,12 @@ This skill requires:
 - `oc mtv` ([kubectl-mtv](https://github.com/yaacov/kubectl-mtv)) -- for MTV/Forklift management
 - `oc debug-queries` ([kubectl-debug-queries](https://github.com/yaacov/kubectl-debug-queries)) -- for resource/log/event queries
 
-If any tool is missing, install with:
+If any tool is missing, install with the secure version-pinned installer:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-mtv/main/install.sh | bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh kubectl-mtv kubectl-debug-queries && rm install-tools.sh
 ```
 
 ## Getting Help

@@ -19,7 +19,7 @@ Set environment variables for vCenter/ESXi connectivity:
 export GOVC_URL=vcenter.example.com
 export GOVC_USERNAME=admin@vsphere.local
 export GOVC_PASSWORD='secret'
-export GOVC_INSECURE=true    # skip certificate validation
+export GOVC_INSECURE="${GOVC_INSECURE:-false}"  # set to 'true' only for lab/test environments without valid certificates
 ```
 
 Optional defaults to avoid repeating `-dc`, `-ds`, `-pool`, `-net` on every command:

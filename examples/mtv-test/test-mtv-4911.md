@@ -15,7 +15,7 @@ The fix for MTV-4336 introduced `failExecutingMigrationOnBlocker()` which immedi
 - Optional environment variables:
   - `VM` — source VM name (default: `mtv-rhel8-sanity`)
   - `CONTROLLER_NS` — Forklift controller namespace (default: `konveyor-forklift`)
-  - `FIXED_IMAGE` — controller image with MTV-4911 fix (default: `quay.io/yaacov/forklift-controller:mtv-4911-01-amd64`)
+  - `FIXED_IMAGE` — controller image with MTV-4911 fix (default: `quay.io/<your-registry>/forklift-controller:<your-tag>`)
   - `OUTAGE_WAIT` — duration in seconds to keep provider broken (default: 120, must be < 300 to stay within grace period)
   - `COMPLETE_WAIT` — maximum time to wait for migration completion (default: 3600)
   - `SKIP_CLEANUP` — set to `true` to preserve resources after test for debugging

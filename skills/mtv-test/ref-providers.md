@@ -3,18 +3,7 @@
 Use these `oc mtv create provider` commands in the generated test script.
 Pick the block that matches the provider type for the scenario.
 
-## vSphere (insecure)
-
-```bash
-oc mtv create provider --name "${PROVIDER}" --type vsphere \
-  --url "https://${GOVC_URL}/sdk" \
-  --username "${GOVC_USERNAME}" \
-  --password "${GOVC_PASSWORD}" \
-  --provider-insecure-skip-tls \
-  -n "${NS}"
-```
-
-## vSphere (with CA cert)
+## vSphere (with CA cert -- default)
 
 ```bash
 oc mtv create provider --name "${PROVIDER}" --type vsphere \
@@ -22,6 +11,17 @@ oc mtv create provider --name "${PROVIDER}" --type vsphere \
   --username "${GOVC_USERNAME}" \
   --password "${GOVC_PASSWORD}" \
   --cacert "$(fetch_ca_cert "${GOVC_URL}")" \
+  -n "${NS}"
+```
+
+## vSphere (insecure -- lab only)
+
+```bash
+oc mtv create provider --name "${PROVIDER}" --type vsphere \
+  --url "https://${GOVC_URL}/sdk" \
+  --username "${GOVC_USERNAME}" \
+  --password "${GOVC_PASSWORD}" \
+  --provider-insecure-skip-tls \
   -n "${NS}"
 ```
 

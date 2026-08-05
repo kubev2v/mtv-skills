@@ -24,10 +24,12 @@ For detailed per-domain queries, labels, and metrics tables:
 This skill requires:
 - `oc metrics` ([kubectl-metrics](https://github.com/yaacov/kubectl-metrics)) -- for Prometheus queries
 
-If missing, install with:
+If missing, install with the secure version-pinned installer:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/yaacov/kubectl-metrics/main/install.sh | bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh kubectl-metrics && rm install-tools.sh
 ```
 
 ## Getting Help

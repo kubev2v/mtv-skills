@@ -14,26 +14,35 @@ kubectl krew install virt
 
 Krew handles the `kubectl-virt` binary and shell completion automatically.
 
+## Secure version-pinned install (recommended)
+
+Use the project installer which downloads a pinned version and verifies the SHA256 checksum:
+
+```bash
+curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/tools/install-tools.sh
+curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
+bash install-tools.sh kubectl-virt && rm install-tools.sh
+```
+
+The version and checksums are tracked in `tools/versions.json`.
+
 ## Manual download
 
 Download `virtctl` from the KubeVirt GitHub releases and install it as `kubectl-virt`
-so that `oc virt` discovers it as a plugin.
+so that `oc virt` discovers it as a plugin. Pin to a known version and verify:
 
 ```bash
-# Option A: match the version running on your cluster
-VERSION=$(oc get kubevirt.kubevirt.io/kubevirt -n kubevirt \
-  -o jsonpath="{.status.observedKubeVirtVersion}")
+VERSION="v1.9.0"
 
-# Option B: use the latest stable release
-VERSION=$(curl -s https://storage.googleapis.com/kubevirt-prow/release/kubevirt/kubevirt/stable.txt)
-
-# Detect OS and architecture
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
 
-# Download and install as kubectl-virt
 curl -fSL -o virtctl \
   "https://github.com/kubevirt/kubevirt/releases/download/${VERSION}/virtctl-${VERSION}-${OS}-${ARCH}"
+
+# Verify SHA256 — compare against tools/versions.json
+shasum -a 256 virtctl
+
 mkdir -p ~/.local/bin
 install -m 0755 virtctl ~/.local/bin/kubectl-virt
 rm -f virtctl
@@ -57,9 +66,9 @@ oc virt --help
 
 ## Shell Completion (Autocomplete)
 
-If you installed via krew, completion is handled automatically. For manual installs,
-create a `kubectl_complete-virt` helper so that `oc virt <TAB>` works.
-This follows the same pattern used by kubectl-mtv and kubectl-metrics.
+If you used the secure installer or krew, completion is set up automatically.
+For manual installs, create a `kubectl_complete-virt` helper so that
+`oc virt <TAB>` works:
 
 ```bash
 cat > ~/.local/bin/kubectl_complete-virt << 'SCRIPT'
