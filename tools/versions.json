@@ -1,6 +1,6 @@
 {
   "kubectl-mtv": {
-    "version": "v0.3.26",
+    "version": "v0.3.30",
     "repo": "yaacov/kubectl-mtv",
     "binary_name": "kubectl-mtv",
     "archive_format": "tar.gz",
@@ -13,20 +13,20 @@
     ],
     "assets": {
       "darwin-amd64": {
-        "url": "https://github.com/yaacov/kubectl-mtv/releases/download/v0.3.26/kubectl-mtv-v0.3.26-darwin-amd64.tar.gz",
-        "sha256": "93d7fddcbb44a96d236ebf4652d6b1edc558a5e7b727d361b1b840a375b04a9c"
+        "url": "https://github.com/yaacov/kubectl-mtv/releases/download/v0.3.30/kubectl-mtv-v0.3.30-darwin-amd64.tar.gz",
+        "sha256": "8e07d1578bc68e03111f9dc4ee387f098b0acc5917c67f07f7b9cfb5af1f0921"
       },
       "darwin-arm64": {
-        "url": "https://github.com/yaacov/kubectl-mtv/releases/download/v0.3.26/kubectl-mtv-v0.3.26-darwin-arm64.tar.gz",
-        "sha256": "4008d643cf0419fef53a0423c7234b20158c65ad9029e73d76480946ac91baa2"
+        "url": "https://github.com/yaacov/kubectl-mtv/releases/download/v0.3.30/kubectl-mtv-v0.3.30-darwin-arm64.tar.gz",
+        "sha256": "43747fb974e9ebcfe683c26f5519da0567771d9f481da9ae092bda57aa971673"
       },
       "linux-amd64": {
-        "url": "https://github.com/yaacov/kubectl-mtv/releases/download/v0.3.26/kubectl-mtv-v0.3.26-linux-amd64.tar.gz",
-        "sha256": "a4cb1d21e7fe51f8227ff4851282becc5044e395061aadaca1905bbc6eb0efd6"
+        "url": "https://github.com/yaacov/kubectl-mtv/releases/download/v0.3.30/kubectl-mtv-v0.3.30-linux-amd64.tar.gz",
+        "sha256": "7cde47e17d9bfe349177094d4a0956071d2ebbcaaf8663a0740811782c42715c"
       },
       "linux-arm64": {
-        "url": "https://github.com/yaacov/kubectl-mtv/releases/download/v0.3.26/kubectl-mtv-v0.3.26-linux-arm64.tar.gz",
-        "sha256": "b2a4cc750476a886158ab5166c1873ea9753dae08cb56bf1ca08e1a1f58cac5d"
+        "url": "https://github.com/yaacov/kubectl-mtv/releases/download/v0.3.30/kubectl-mtv-v0.3.30-linux-arm64.tar.gz",
+        "sha256": "4953b69660f9db2d4ec6aa9170d0de081d60ee28aa6526ad2a6358482ae7b663"
       }
     }
   },
