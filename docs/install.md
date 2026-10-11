@@ -16,9 +16,16 @@ rm install.sh
 ```
 
 The script clones the repo to `~/.local/share/mtv-skills` (or pulls if already
-present) and creates user-wide symlinks in `~/.agents/skills`.
+present), then opens a menu of skills to link into `~/.agents/skills`.
 
-Run the same command again any time to update.
+- A new install marks every skill for install.
+- A skill that is already linked is marked for update.
+- Unmark a linked skill to remove that link. Only symlinks that point at this
+  checkout are removed; other files in `~/.agents/skills` are left in place.
+- Move with `j`/`k` or the arrow keys, space to mark or unmark, and `a` to
+  toggle all. Enter applies the selection. `q` leaves existing links unchanged.
+
+Run the same command again any time to update. The menu is shown on every run.
 
 ## CLI Plugin Prerequisites
 
@@ -61,6 +68,9 @@ your agent: *"Install the CLI plugins so I can use these tools."*
 ## Removal
 
 ### Skill symlinks
+
+The installer menu removes a user-wide skill when you unmark it and press Enter.
+To remove the links without a menu:
 
 **User-wide:**
 

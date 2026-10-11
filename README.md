@@ -27,7 +27,7 @@ curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS 
 bash install.sh && rm install.sh
 ```
 
-The installer links each skill into `~/.agents/skills`. Re-run it any time to update.
+The installer opens a menu and links the skills you mark into `~/.agents/skills`.
 
 For removal and other options see [docs/install.md](docs/install.md).
 
