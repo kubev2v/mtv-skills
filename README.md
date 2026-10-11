@@ -1,6 +1,6 @@
 # mtv-skills
 
-AI agent skills for MTV/Forklift migrations on OpenShift and Kubernetes. Works with [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and [Cursor](https://www.cursor.com/).
+AI agent skills for MTV/Forklift migrations on OpenShift and Kubernetes. Works with agents that load skills from `~/.agents/skills`.
 
 ## What Can I Do with These Skills?
 
@@ -21,26 +21,13 @@ Just open a chat and ask. Here's one high-impact example per skill:
 
 ## Quick Start
 
-### Cursor / Claude Code
-
 ```bash
 curl -sSLO https://raw.githubusercontent.com/kubev2v/mtv-skills/main/install.sh
 curl -sSL  https://raw.githubusercontent.com/kubev2v/mtv-skills/main/SHA256SUMS | shasum -a 256 --check --ignore-missing
 bash install.sh && rm install.sh
 ```
 
-### Claude Code (plugin install)
-
-```bash
-claude plugin marketplace add kubev2v/mtv-skills
-claude plugin install mtv-skills@kubev2v
-```
-
-To update later:
-
-```bash
-claude plugin update mtv-skills@kubev2v
-```
+The installer links each skill into `~/.agents/skills`. Re-run it any time to update.
 
 For removal and other options see [docs/install.md](docs/install.md).
 
@@ -73,7 +60,7 @@ See [docs/skills.md](docs/skills.md) for a full list of skills with descriptions
 | Path | Description |
 |------|-------------|
 | **[docs/skills.md](docs/skills.md)** | Quick reference for every skill (what / when / trigger) |
-| **[docs/install.md](docs/install.md)** | Full installation and removal instructions (Claude Code & Cursor) |
+| **[docs/install.md](docs/install.md)** | Full installation and removal instructions |
 | **[docs/setup-mtv-agent.md](docs/setup-mtv-agent.md)** | Setting up the [mtv-agent](https://github.com/kubev2v/mtv-agent) AI assistant |
 | **[docs/create-providers-cli.md](docs/create-providers-cli.md)** | Creating MTV source providers using `oc mtv` |
 | **[examples/mtv-test/create-providers.sh](examples/mtv-test/create-providers.sh)** | Script that creates providers from environment variables |

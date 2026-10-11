@@ -36,18 +36,7 @@ link_skills() {
   ok "Linked $count skills → $target_dir ($label)"
 }
 
-if [ -d "$HOME/.cursor" ]; then
-  link_skills "$HOME/.cursor/skills" "Cursor user-wide"
-fi
-
-if [ -d "$HOME/.claude" ]; then
-  link_skills "$HOME/.claude/skills" "Claude Code user-wide"
-fi
-
-if [ ! -d "$HOME/.cursor" ] && [ ! -d "$HOME/.claude" ]; then
-  info "No ~/.cursor or ~/.claude directory found — creating Cursor skills dir"
-  link_skills "$HOME/.cursor/skills" "Cursor user-wide"
-fi
+link_skills "$HOME/.agents/skills" "user-wide"
 
 echo ""
 ok "Done! Skills are ready to use."

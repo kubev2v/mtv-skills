@@ -2,9 +2,9 @@
 
 ## Prerequisites
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or [Cursor](https://www.cursor.com/) installed and configured
+- An agent that loads skills from `~/.agents/skills`
 
-## Cursor / Claude Code
+## Install
 
 Download the installer, verify its checksum, and run it:
 
@@ -16,35 +16,9 @@ rm install.sh
 ```
 
 The script clones the repo to `~/.local/share/mtv-skills` (or pulls if already
-present) and creates user-wide symlinks in `~/.cursor/skills` and/or
-`~/.claude/skills` depending on which directories exist.
+present) and creates user-wide symlinks in `~/.agents/skills`.
 
 Run the same command again any time to update.
-
-## Claude Code Plugin (alternative)
-
-Install as a Claude Code plugin — no cloning or symlinks needed:
-
-```bash
-claude plugin marketplace add kubev2v/mtv-skills
-claude plugin install mtv-skills@kubev2v
-```
-
-Skills appear as `/mtv-skills:<skill-name>` in Claude Code.
-
-Every pushed commit is automatically a new version (no pinned SHA or version).
-To update later:
-
-```bash
-claude plugin marketplace update kubev2v
-claude plugin install mtv-skills@kubev2v
-```
-
-To uninstall:
-
-```bash
-claude plugin uninstall mtv-skills@kubev2v
-```
 
 ## CLI Plugin Prerequisites
 
@@ -86,19 +60,13 @@ your agent: *"Install the CLI plugins so I can use these tools."*
 
 ## Removal
 
-### Claude Code Plugin
-
-```bash
-claude plugin uninstall mtv-skills@kubev2v
-```
-
-### Claude Code Symlinks
+### Skill symlinks
 
 **User-wide:**
 
 ```bash
-for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
-  rm -f ~/.claude/skills/"$skill"
+for skill in check-ceph-health check-ocp-health debug-ceph govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
+  rm -f ~/.agents/skills/"$skill"
 done
 ```
 
@@ -106,27 +74,8 @@ done
 
 ```bash
 # From inside the target project directory
-for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
-  rm -f .claude/skills/"$skill"
-done
-```
-
-### Cursor
-
-**User-wide:**
-
-```bash
-for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
-  rm -f ~/.cursor/skills/"$skill"
-done
-```
-
-**Per-project:**
-
-```bash
-# From inside the target project directory
-for skill in check-ceph-health check-ocp-health govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
-  rm -f .cursor/skills/"$skill"
+for skill in check-ceph-health check-ocp-health debug-ceph govc-vsphere kubectl-mtv kubectl-virt mcp-setup mtv-test observe-metrics troubleshoot-virt; do
+  rm -f .agents/skills/"$skill"
 done
 ```
 
