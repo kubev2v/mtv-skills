@@ -139,7 +139,7 @@ Requires Docker or Podman and a valid cluster token:
 docker run --rm -p 8080:8080 \
   -e MCP_KUBE_SERVER=https://api.cluster.example.com:6443 \
   -e MCP_KUBE_TOKEN=sha256~xxxx \
-  quay.io/yaacov/kubectl-mtv-mcp-server:v0.3.26
+  quay.io/yaacov/kubectl-mtv-mcp-server:v0.3.34
 
 # kubectl-metrics
 docker run --rm -p 8081:8080 \
@@ -164,7 +164,7 @@ in `tools/versions.json`):
 
 ```bash
 # kubectl-mtv
-oc apply -f https://raw.githubusercontent.com/yaacov/kubectl-mtv/v0.3.26/deploy/mcp-server.yaml
+oc apply -f https://raw.githubusercontent.com/yaacov/kubectl-mtv/v0.3.34/deploy/mcp-server.yaml
 
 # kubectl-debug-queries
 oc apply -f https://raw.githubusercontent.com/yaacov/kubectl-debug-queries/v0.1.5/deploy/mcp-server.yaml
